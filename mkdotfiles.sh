@@ -35,7 +35,6 @@ echo starting.; sleep 2
 tar \
 --exclude-caches-all \
 --exclude-vcs \
---exclude '*[sS]hare*' \
 --exclude '*[cC]ache*' \
 --exclude 'tmp' \
 --exclude '.tmp' \
