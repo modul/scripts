@@ -38,6 +38,7 @@ tar \
 --exclude '*[cC]ache*' \
 --exclude 'tmp' \
 --exclude '.tmp' \
+--exclude 'Trash' \
 --exclude '*thumbnails*' \
 --exclude '.macromedia' \
 --exclude '.cpan' \
