@@ -69,7 +69,11 @@
 #define Bcy 3
 #define Afm 4
 
-#define SNAME(s) s == Chs ? "Chaos" : (s == Dsc ? "Discord" : (s == Cfn ? "Confusion" : (s == Bcy ? "Bureaucracy" : (s == Afm ? "Aftermath" : ""))))
+#define SNAME(s) s == Chs ? "Chaos" : \
+				(s == Dsc ? "Discord" : \
+				(s == Cfn ? "Confusion" : \
+				(s == Bcy ? "Bureaucracy" : \
+				(s == Afm ? "Aftermath" : ""))))
 
 void print_calendar_month(int today, int season, int seasonstart, int yold);
 void print_calendar_year(int seasonstarts[], int yold);
