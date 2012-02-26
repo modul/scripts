@@ -18,6 +18,7 @@ baudrate = 115200
 timeout = 1
 device = ''
 logfile = ''
+log = None
 
 if argc > 1:
 	device = argv[1]
@@ -38,13 +39,14 @@ except serial.serialutil.SerialException as msg:
 print "opened %s with %i Bps, %.1fs timeout" % (device, baudrate, timeout)
 port.setWriteTimeout(10 * timeout)
 
-try:
-	log = open(logfile, 'w')
-except IOError as msg:
-	print msg
-	log = None
-else:
-	print "opened %s for writing" % logfile
+if logfile:
+	try:
+		log = open(logfile, 'w')
+	except IOError as msg:
+		print msg
+		log = None
+	else:
+		print "opened %s for writing" % logfile
 
 try:
 	while 1:
