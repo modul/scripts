@@ -15,7 +15,7 @@ argv = sys.argv
 argc = len(argv)
 
 baudrate = 115200
-timeout = 1
+timeout = .5
 device = ''
 logfile = ''
 log = None
@@ -37,7 +37,6 @@ except serial.serialutil.SerialException as msg:
 	sys.exit(1)
 
 print "opened %s with %i Bps, %.1fs timeout" % (device, baudrate, timeout)
-port.setWriteTimeout(10 * timeout)
 
 if logfile:
 	try:
