@@ -3,7 +3,7 @@
  *
  * This might let your ThinkLight blink!
  *
- * Usage: blink [COUNT] [DUTY/%] [PERIOD/ms]
+ * Usage: blink [COUNT] [DUTY/%] [PERIOD/ms] 
  *
  * author: mo
  * created: 2012/04/08
@@ -18,7 +18,7 @@
 
 #define COUNT 1
 #define PERIOD 500
-#define DUTY 25
+#define DUTY 50
 
 #define light(x, fp) fputs(x, fp); fflush(fp)
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	if (argc > 1 && sscanf(argv[1], "%u", &i) == 1) 
 		cnt = i;
 	if (argc > 2 && sscanf(argv[2], "%u", &i) == 1)
-		dty = i;
+		dty = i > 100 ? 100 : i;
 	if (argc > 3 && sscanf(argv[3], "%u", &i) == 1)
 		per = i;
 
