@@ -104,6 +104,12 @@ def centered(date=None, margin=hours(12)):
 def distance(seq):
 	return max(seq)-min(seq)
 
+def timeofday(date):
+	"""
+	returns the decimal time of day from 'date'
+	"""
+	return date.hour + date.minute/60.
+
 def first(arg, *args):
 	"""
 	returns the first of n values or a sequence.
