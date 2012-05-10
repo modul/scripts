@@ -10,50 +10,36 @@
 
 import sys
 import serial
+from argparse import FileType, ArgumentParser
 
-argv = sys.argv
-argc = len(argv)
+parser = ArgumentParser(description="Continously read serial data")
+parser.add_argument("device", help="serial device to open")
+parser.add_argument("--baudrate", default=115200, type=int, help="baudrate (bps) to set")
+parser.add_argument("--timeout", default=0.5, type=float, help="timeout for serial read/write")
+parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="file to log to")
+parser.add_argument("--quiet", action="store_true", help="don't print to stdout")
 
-baudrate = 115200
-timeout = .5
-device = ''
-logfile = ''
-log = None
-
-if argc > 1:
-	device = argv[1]
-	if argc > 2:
-		baudrate = int(argv[2])
-		if argc > 3:
-			logfile = argv[3]
-else:
-	print "Usage: %s DEVICE [BAUDRATE] [LOGFILE]" % argv[0]
-	sys.exit(1)
+args = parser.parse_args()
 
 try:
-	port = serial.Serial(device, baudrate, timeout=timeout)
+	port = serial.Serial(args.device, args.baudrate, timeout=args.timeout)
 except serial.serialutil.SerialException as msg:
 	print msg
 	sys.exit(1)
+else:
+	print "opened %s with %i Bps, %.1fs timeout" % (args.device, args.baudrate, args.timeout)
 
-print "opened %s with %i Bps, %.1fs timeout" % (device, baudrate, timeout)
-
-if logfile:
-	try:
-		log = open(logfile, 'w')
-	except IOError as msg:
-		print msg
-		log = None
-	else:
-		print "opened %s for writing" % logfile
+if args.logfile:
+	print "opened %s for writing" % (args.logfile.name)
 
 try:
 	while 1:
 		incoming = port.readlines()
 		if incoming:
 			for line in incoming:
-				print line,
-				if log:
-					print >> log, line,
+				if not args.quiet:
+					print line,
+				if args.logfile:
+					print >> args.logfile, line,
 except KeyboardInterrupt:
 	sys.exit(0)
