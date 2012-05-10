@@ -12,12 +12,12 @@ import sys
 import serial
 from argparse import FileType, ArgumentParser
 
-parser = ArgumentParser(description="Continously read serial data")
+parser = ArgumentParser(description="Continously read serial data", usage="%(prog)s [options] device")
 parser.add_argument("device", help="serial device to open")
-parser.add_argument("--baudrate", default=115200, type=int, help="baudrate (bps) to set")
+parser.add_argument("--baudrate", "-b", default=115200, type=int, help="baudrate (bps) to set")
+parser.add_argument("--logfile", "-l", metavar="FILE", type=FileType(mode="w"), help="file to log to")
+parser.add_argument("--quiet", "-q", action="store_true", help="don't print to stdout")
 parser.add_argument("--timeout", default=0.5, type=float, help="timeout for serial read/write")
-parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="file to log to")
-parser.add_argument("--quiet", action="store_true", help="don't print to stdout")
 
 args = parser.parse_args()
 
