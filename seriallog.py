@@ -15,17 +15,22 @@ from argparse import FileType, ArgumentParser
 
 TIMEOUT = 0.5
 
-parser = ArgumentParser(description="Continously read serial data", usage="%(prog)s [options] device")
+parser = ArgumentParser(description="Continuously read serial data", usage="%(prog)s [options] device")
 parser.add_argument("device", help="serial device to open")
-parser.add_argument("--quiet", "-q", action="store_true", help="don't print to stdout")
-parser.add_argument("--baudrate", "-b", default=115200, type=int, help="baudrate (bps) to set")
-parser.add_argument("--logfile", "-l", metavar="FILE", type=FileType(mode="w"), help="file to log to")
-parser.add_argument("--send", metavar="CMD", nargs="+", help="write serial commands, then read")
-parser.add_argument("--wait", metavar="t", default=0, type=float, help="wait before reading")
-parser.add_argument("--eol", default="lf", choices=["lf", "lfcr", "crlf", "cr"], help="which EOL to send")
-parser.add_argument("--date", action="store_true", help="prepend time and date")
-parser.add_argument("--timestamp", action="store_true", help="prepend timestamp")
-parser.add_argument("--seconds", action="store_true", help="prepend seconds since start")
+parser.add_argument("-q", "--quiet", action="store_true", help="don't print to stdout")
+parser.add_argument("--baudrate", metavar="BAUD", default=115200, type=int, help="set baudrate, default is 115200")
+parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="write to logfile")
+parser.add_argument("--wait", metavar="t", default=0, type=float, help="wait some time before reading")
+
+group = parser.add_argument_group(title="Timestamps")
+group = group.add_mutually_exclusive_group()
+group.add_argument("--date", action="store_true", help="prepend time and date")
+group.add_argument("--timestamp", action="store_true", help="prepend timestamp")
+group.add_argument("--seconds", action="store_true", help="prepend seconds since start")
+
+group = parser.add_argument_group(title="Sending")
+group.add_argument("--send", metavar="CMD", nargs="+", help="write serial commands, then read")
+group.add_argument("--eol", default="lf", choices=["lf", "lfcr", "crlf", "cr"])
 
 args = parser.parse_args()
 args.eol.replace("lf", "\n")
