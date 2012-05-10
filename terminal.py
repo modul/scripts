@@ -26,7 +26,7 @@ if argc > 1:
 	if argc > 2:
 		baudrate = int(argv[2])
 		if argc > 3:
-			timeout = int(argv[3])
+			timeout = float(argv[3])
 else:
 	print "Usage: %s DEVICE [BAUDRATE] [TIMEOUT]" % argv[0]
 	sys.exit(1)
@@ -38,17 +38,18 @@ except serial.serialutil.SerialException as msg:
 	sys.exit(1)
 
 print "opened %s with %i Bps, %.1fs timeout" % (device, baudrate, timeout)
-port.setWriteTimeout(10 * timeout)
+
+prompt = "> "
+
+#IDEA prompt_command: string to send before prompt, include in prompt
+# -> send(command)
+# -> prompt = reply + "> "
 
 try:
 	while 1:
 		incoming = port.readlines()
-		if incoming:
-			for line in incoming[:-1]:
-				print line,
-			prompt = incoming[-1]
-		else:
-			prompt = 'no data> '
+		for line in incoming:
+			print line,
 		try:
 			i = raw_input(prompt)
 			if i:
