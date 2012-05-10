@@ -14,7 +14,6 @@ from time import sleep
 from argparse import FileType, ArgumentParser
 
 TIMEOUT = 0.5
-EOL = '\n'
 
 parser = ArgumentParser(description="Continously read serial data", usage="%(prog)s [options] device")
 parser.add_argument("device", help="serial device to open")
@@ -23,8 +22,11 @@ parser.add_argument("--logfile", "-l", metavar="FILE", type=FileType(mode="w"), 
 parser.add_argument("--send", metavar="CMD", nargs="+", help="write serial commands, then read")
 parser.add_argument("--wait", metavar="t", default=0, type=float, help="wait before reading")
 parser.add_argument("--quiet", "-q", action="store_true", help="don't print to stdout")
+parser.add_argument("--eol", default="lf", choices=["lf", "lfcr", "crlf", "cr"], help="which EOL to send")
 
 args = parser.parse_args()
+args.eol.replace("lf", "\n")
+args.eol.replace("cr", "\r")
 
 try:
 	port = serial.Serial(args.device, args.baudrate, timeout=TIMEOUT)
@@ -41,7 +43,7 @@ try:
 	while 1:
 		if args.send:
 			for cmd in args.send:
-				port.write(cmd+EOL)
+				port.write(cmd+args.eol)
 
 		if args.wait:
 			sleep(args.wait)
