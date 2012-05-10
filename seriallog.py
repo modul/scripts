@@ -10,7 +10,7 @@
 
 import sys
 import serial
-from time import sleep
+import time
 from argparse import FileType, ArgumentParser
 
 TIMEOUT = 0.5
@@ -47,6 +47,13 @@ else:
 if args.logfile:
 	print "opened %s for writing" % (args.logfile.name)
 
+tstart = time.time()
+
+fmt = "{line}"
+fmt = args.timestamp and "{timestamp} " + fmt or fmt
+fmt = args.date      and "{date} " + fmt or fmt
+fmt = args.seconds   and "{sec:.2f} " + fmt or fmt
+
 try:
 	while 1:
 		if args.send:
@@ -54,14 +61,23 @@ try:
 				port.write(cmd+args.eol)
 
 		if args.wait:
-			sleep(args.wait)
+			time.sleep(args.wait)
 
 		incoming = port.readlines()
-		if incoming:
-			for line in incoming:
-				if not args.quiet:
-					print line,
-				if args.logfile:
-					print >> args.logfile, line,
+		if not incoming:
+			continue
+
+		for line in incoming:
+			buf = fmt.format(line=line, \
+					timestamp=int(time.time()), \
+					date=time.strftime("%Y/%m/%d %H:%M:%S"), \
+					sec=time.time()-tstart)
+
+			if not args.quiet:
+				print buf,
+
+			if args.logfile:
+				print >> args.logfile, buf,
+
 except KeyboardInterrupt:
 	sys.exit(0)
