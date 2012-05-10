@@ -17,12 +17,15 @@ TIMEOUT = 0.5
 
 parser = ArgumentParser(description="Continously read serial data", usage="%(prog)s [options] device")
 parser.add_argument("device", help="serial device to open")
+parser.add_argument("--quiet", "-q", action="store_true", help="don't print to stdout")
 parser.add_argument("--baudrate", "-b", default=115200, type=int, help="baudrate (bps) to set")
 parser.add_argument("--logfile", "-l", metavar="FILE", type=FileType(mode="w"), help="file to log to")
 parser.add_argument("--send", metavar="CMD", nargs="+", help="write serial commands, then read")
 parser.add_argument("--wait", metavar="t", default=0, type=float, help="wait before reading")
-parser.add_argument("--quiet", "-q", action="store_true", help="don't print to stdout")
 parser.add_argument("--eol", default="lf", choices=["lf", "lfcr", "crlf", "cr"], help="which EOL to send")
+parser.add_argument("--date", action="store_true", help="prepend time and date")
+parser.add_argument("--timestamp", action="store_true", help="prepend timestamp")
+parser.add_argument("--seconds", action="store_true", help="prepend seconds since start")
 
 args = parser.parse_args()
 args.eol.replace("lf", "\n")
