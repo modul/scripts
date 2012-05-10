@@ -23,7 +23,6 @@ parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="
 parser.add_argument("--wait", metavar="t", default=0, type=float, help="wait some time before reading")
 
 group = parser.add_argument_group(title="Timestamps")
-group = group.add_mutually_exclusive_group()
 group.add_argument("--date", action="store_true", help="prepend time and date")
 group.add_argument("--timestamp", action="store_true", help="prepend timestamp")
 group.add_argument("--seconds", action="store_true", help="prepend seconds since start")
@@ -49,10 +48,10 @@ if args.logfile:
 
 tstart = time.time()
 
-fmt = "{line}"
-fmt = args.timestamp and "{timestamp} " + fmt or fmt
-fmt = args.date      and "{date} " + fmt or fmt
-fmt = args.seconds   and "{sec:.2f} " + fmt or fmt
+fmt  = args.timestamp and "{timestamp} " or ""
+fmt += args.date      and "{date} " or ""
+fmt += args.seconds   and "{sec:.2f} " or ""
+fmt += "{line}"
 
 try:
 	while 1:
