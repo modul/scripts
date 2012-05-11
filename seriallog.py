@@ -30,8 +30,7 @@ group.add_argument("--send", metavar="CMD", nargs="+", help="write serial comman
 group.add_argument("--eol", default="lf", choices=["lf", "lfcr", "crlf", "cr"])
 
 args = parser.parse_args()
-args.eol = args.eol.replace("lf", "\n")
-args.eol = args.eol.replace("cr", "\r")
+eol = args.eol.replace("lf", "\n").replace("cr", "\r")
 
 try:
 	port = serial.Serial(args.device, args.baudrate, timeout=args.interval)
@@ -55,7 +54,7 @@ try:
 	while 1:
 		if args.send:
 			for cmd in args.send:
-				port.write(cmd+args.eol)
+				port.write(cmd+eol)
 
 		incoming = port.readlines()
 		if not incoming:
