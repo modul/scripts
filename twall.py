@@ -23,8 +23,8 @@ from os import system
 from time import sleep, localtime, strftime
 
 __width=40
-un='modul'
-pw='zvfgrezo30'
+un='foo'
+pw='bar'
 interval=300
 tweets_at_a_time=3
 editor="/usr/bin/joe" 

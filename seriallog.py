@@ -5,7 +5,10 @@
 # Continuously reads and prints serial data
 # and optionally writes it to a logfile.
 #
-# seriallog.py DEVICE [BAUDRATE] [LOGFILE]
+# seriallog.py --help
+#
+# author: Remo Giermann
+# created: 2011
 #
 
 import sys
@@ -39,11 +42,9 @@ except serial.serialutil.SerialException as msg:
 	sys.exit(1)
 else:
 	print "opened %s with %i Bps, %.1fs interval" % (args.device, args.baudrate, args.interval)
+	if args.logfile:
+		print "opened %s for logging" % (args.logfile.name)
 
-if args.logfile:
-	print "opened %s for writing" % (args.logfile.name)
-
-tstart = time.time()
 
 fmt  = args.timestamp and "{timestamp} " or ""
 fmt += args.date      and "{date} " or ""
@@ -51,6 +52,7 @@ fmt += args.seconds   and "{sec:.2f} " or ""
 fmt += "{line}"
 
 try:
+	tstart = time.time()
 	while 1:
 		if args.send:
 			for cmd in args.send:
