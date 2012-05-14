@@ -80,6 +80,7 @@ try:
 
 			if args.logfile:
 				print >> args.logfile, buf,
+				args.logfile.flush()
 
 except KeyboardInterrupt:
 	sys.exit(0)

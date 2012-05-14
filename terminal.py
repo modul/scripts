@@ -79,6 +79,7 @@ if args.commands:
 			print incoming,
 		if args.logfile:
 			print >>args.logfile, incoming,
+			args.logfile.flush()
 	sys.exit(0)
 
 
@@ -90,6 +91,7 @@ try:
 				print incoming,
 			if args.logfile:
 				print >> args.logfile, "< "+incoming,
+				args.logfile.flush()
 
 		try:
 			cmd = raw_input(prompt())
