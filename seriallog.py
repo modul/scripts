@@ -10,18 +10,24 @@
 # author: Remo Giermann
 # created: 2011
 #
+# version 1.0
 
 import sys
 import serial
 import time
 from argparse import FileType, ArgumentParser
 
+__version__ = "1.0"
+
 parser = ArgumentParser(description="Continuously read serial data", usage="%(prog)s [options] device")
+
 parser.add_argument("device", help="serial device to open")
+
+parser.add_argument("-v", "--version", action="version", version="%(prog)s "+__version__)
 parser.add_argument("-q", "--quiet", action="store_true", help="don't print to stdout")
-parser.add_argument("--interval", metavar="SEC", default=0.5, type=float, help="set read interval/timeout")
-parser.add_argument("--baudrate", metavar="BAUD", default=115200, type=int, help="set baudrate, default is 115200")
-parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="write to logfile")
+parser.add_argument("--interval", metavar="SEC", default=0.5, type=float, help="set read interval/timeout (0.5)")
+parser.add_argument("--baudrate", metavar="BAUD", default=115200, type=int, help="set baudrate (115200)")
+parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="write output to logfile")
 
 group = parser.add_argument_group(title="Timestamps")
 group.add_argument("--date", action="store_true", help="prepend time and date")
@@ -29,8 +35,9 @@ group.add_argument("--timestamp", action="store_true", help="prepend timestamp")
 group.add_argument("--seconds", action="store_true", help="prepend seconds since start")
 
 group = parser.add_argument_group(title="Sending")
-group.add_argument("--send", metavar="CMD", nargs="+", help="write serial commands, then read")
-group.add_argument("--eol", default="lf", choices=["lf", "lfcr", "crlf", "cr"])
+group.add_argument("--send", metavar="CMD", nargs="+", help="send serial commands, then read")
+group.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr"], help="choose end of line characters")
+
 
 args = parser.parse_args()
 eol = args.eol.replace("lf", "\n").replace("cr", "\r")
