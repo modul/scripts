@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 #
+# "THE BEER-WARE LICENSE" (Revision 42):
+# <mo@liberejo.de> wrote this file. As long as you retain this notice you
+# can do whatever you want with this stuff. If we meet some day, and you think
+# this stuff is worth it, you can buy me a beer in return - Remo Giermann.
+#
 # Very simple serial terminal
 #
 # If serial data is present, prints it.
 # Afterwards, in any case, waits for user input.
 #
-# terminal.py DEVICE [BAUDRATE] [TIMEOUT]
+# terminal.py --help
+#
+# author: Remo Giermann
+# created: 2012/02/26
 #
 
 import sys

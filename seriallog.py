@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 #
+# "THE BEER-WARE LICENSE" (Revision 42):
+# <mo@liberejo.de> wrote this file. As long as you retain this notice you
+# can do whatever you want with this stuff. If we meet some day, and you think
+# this stuff is worth it, you can buy me a beer in return - Remo Giermann.
+#
 # Very simple serial logger
 #
 # Continuously reads and prints serial data
@@ -8,9 +13,8 @@
 # seriallog.py --help
 #
 # author: Remo Giermann
-# created: 2011
+# created: 2012/02/26
 #
-# version 1.0
 
 import sys
 import serial
