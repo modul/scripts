@@ -11,23 +11,15 @@
 #
 # author:  Remo Giermann
 # created: 2011/04
+# updated: 2012/05/15
 #
 
 import os
 import sys
 import time
+from re import compile
 
-def check_extension(filename, exts):
-	"""
-	Checks if 'filename' has any of 'exts' as its
-	extension and returns it if so.
-	"""
-	for ext in exts:
-		if filename.lower().endswith(ext.lower()):
-			return ext
-	return ''
-
-def check_mtime(path, days):
+def check_time(path, days):
 	"""
 	Checks creation and modification time of 'path' and returns
 	True if it was modified or created in the last 'days' days
@@ -41,48 +33,43 @@ def check_mtime(path, days):
 	then = now - days*24*3600	
 	return mtime > then or ctime > then
 
-def find(dir, name='', exts=[], days=0, hook=None):
+def find(directory, name='', days=0, hook=None):
 	"""
-	Find and print files in 'dir'.
-	If 'name' is set, print only files with that string
-	in their names.
-	If 'exts' is set to a list of file extensions, only
-	print files having these extensions. 	
-	If 'days' is not 0, print only files modified in the 
-	last 'days' days.
-	If 'hook' is callable, then it will be on any
-	file found (matching above criteria) with the filename 
-	as an argument or if 'hook' has an append method, 
-	each found name will be appended to it, in both cases
-	nothing will be printed.	
+	Find files in 'directory' (recursively). 
+	'name' might be a regular expression to match against
+	the filename (not the path). If 'days' is not 0, match
+	only files modified in the last days. If 'hook' is callable, 
+	then it will be called on any file found with the filename 
+	as an argument.	Otherwise, if 'hook' is True, results 
+	get printed.
+
+	>>> find("./", name=r"find.pyc?")
+	./find.pyc
+	./find.py
 	"""
-	if hasattr(hook, '__call__'):
+	if callable(hook):
 		call = hook
-	elif hasattr(hook, 'append'):
-		call = hook.append
+	elif hook is True:
+		def call(x):
+			print x
 	else:
-		call = None
-		
+		def call(x):
+			pass
+	
+	pattern = compile(name)
 
-	for dirpath, dirs, files in os.walk(dir):
-		rm = []
-		for d in dirs:
-			path = os.path.join(dirpath, d)
-			if days > 0 and check_mtime(path, days) is False:
-				dirs.remove(d)
-
-		for i in rm:
-			del dirs[i]
-
+	for dirpath, dirs, files in os.walk(directory):
 		for f in files:
 			path = os.path.join(dirpath, f)
-			if len(exts) == 0 or check_extension(f, exts) in exts:
-				if days == 0 or check_mtime(path, days) is True:
-					if call is None:
-						print path
-					else:
-						call(path)
+			if pattern.match(f) is not None:
+				if days == 0 or check_time(path, days) is True:
+					call(path)
 
+		if days > 0: # we don't need to walk unmodified dirs then
+			for d in dirs:
+				path = os.path.join(dirpath, d)
+				if check_time(path, days) is False:
+					dirs.remove(d)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__': 
@@ -114,7 +101,7 @@ This is run COUNT times and the timing results are printed.
 	print "looking in {path} for music from the last {days} days - repeating {c} times...".format(path=path, days=days, c=count)
 
 	gnu = Timer("gnufind(path, days)", "from __main__ import gnufind, path, days")
-	pyt = Timer("find(exts=exts, dir=path, days=days, hook=[])", "from __main__ import find, path, days, exts")
+	pyt = Timer("find(name=r'.*\.(ogg|flac|mp3)', directory=path, days=days)", "from __main__ import find, path, days, exts")
 	tpyt = pyt.repeat(number=1, repeat=count)
 	tgnu = gnu.repeat(number=1, repeat=count)
 	
