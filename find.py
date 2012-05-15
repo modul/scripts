@@ -94,14 +94,13 @@ This is run COUNT times and the timing results are printed.
 		print usage
 		exit(1)
 
-	exts = ['.mp3', '.ogg', '.flac']
 	count = int(argv[1])
 	path = argv[2]
 	days = int(argv[3])
 	print "looking in {path} for music from the last {days} days - repeating {c} times...".format(path=path, days=days, c=count)
 
 	gnu = Timer("gnufind(path, days)", "from __main__ import gnufind, path, days")
-	pyt = Timer("find(name=r'.*\.(ogg|flac|mp3)', directory=path, days=days)", "from __main__ import find, path, days, exts")
+	pyt = Timer("find(name=r'.*\.(ogg|flac|mp3)', directory=path, days=days)", "from __main__ import find, path, days")
 	tpyt = pyt.repeat(number=1, repeat=count)
 	tgnu = gnu.repeat(number=1, repeat=count)
 	
