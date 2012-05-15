@@ -17,7 +17,7 @@
 import os
 import sys
 import time
-from re import compile
+from re import match
 
 def check_time(path, days):
 	"""
@@ -56,12 +56,10 @@ def find(directory, name='', days=0, hook=None):
 		def call(x):
 			pass
 	
-	pattern = compile(name)
-
 	for dirpath, dirs, files in os.walk(directory):
 		for f in files:
 			path = os.path.join(dirpath, f)
-			if pattern.match(f) is not None:
+			if match(name, f) is not None:
 				if days == 0 or check_time(path, days) is True:
 					call(path)
 
