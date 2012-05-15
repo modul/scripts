@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-#
+# 
+# ----------------------------------------------------------------------------
 # "THE BEER-WARE LICENSE" (Revision 42):
-# <mo@liberejo.de> wrote this file. As long as you retain this notice you
-# can do whatever you want with this stuff. If we meet some day, and you think
+# <mo@liberejo.de> wrote this file. As long as you retain this notice you can
+# do whatever you want with this stuff. If we meet some day, and you think
 # this stuff is worth it, you can buy me a beer in return - Remo Giermann.
+# ----------------------------------------------------------------------------
 #
 # Very simple serial terminal
 #
@@ -23,7 +25,7 @@ from time import strftime
 from textwrap import fill
 from argparse import FileType, ArgumentParser, REMAINDER
 
-__version__ = "1.0"
+__version__ = "0.2"
 
 parser = ArgumentParser()
 parser.usage = "%(prog)s device [command, ...] [options]"
