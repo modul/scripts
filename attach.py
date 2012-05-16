@@ -245,7 +245,7 @@ if __name__ == "__main__":
 				copy(filename, filename+'~')
 				print "backed up", filename
 			with open(filename, "w") as fp:
-				fp.write(''.join(origlines))
+				fp.writelines(origlines))
 		except IOError as msg:
 			print msg
 			continue
