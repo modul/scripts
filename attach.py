@@ -222,7 +222,8 @@ if __name__ == "__main__":
 
 		if origlines is None:
 			continue
-	
+
+		skip = 0
 		if len(origlines) > 0:
 			for oline, i in zip(origlines[:10], count()):
 				if len(oline) > 3 and oline in patch and not args.force:
@@ -245,7 +246,7 @@ if __name__ == "__main__":
 				copy(filename, filename+'~')
 				print "backed up", filename
 			with open(filename, "w") as fp:
-				fp.writelines(origlines))
+				fp.writelines(origlines)
 		except IOError as msg:
 			print msg
 			continue
