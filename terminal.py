@@ -21,31 +21,28 @@
 import sys
 import serial
 import readline
-from textwrap import fill
-from argparse import FileType, ArgumentParser, REMAINDER
+from argparse import FileType, ArgumentParser
 
 __version__ = "0.2.1"
 
-hexwidth, binwidth, decwidth = 3, 9, 4
-hexnum, binnum, decnum = 16, 8, 16
-
+hexwidth, binwidth, decwidth = 3, 9, 4 # number of digits + 1 space
 hexs = lambda text: (len(text)*"{:02x} ").format(*bytearray(text))
 bins = lambda text: (len(text)*"{:08b} ").format(*bytearray(text))
 decs = lambda text: (len(text)*"{: 3d} ").format(*bytearray(text))
-hexpar = lambda text: fill(hexs(text), hexnum*hexwidth)+'\n'
-binpar = lambda text: fill(bins(text), binnum*binwidth)+'\n'
-decpar = lambda text: fill(decs(text), decnum*decwidth)+'\n'
 
 def factory(options, port):
 	''' Build helper functions based on settings in 'options'. '''
 	from time import strftime
+	from textwrap import fill
+
+	formatter = lambda conv, bwidth: lambda text: fill(conv(text), bwidth*options.width)+'\n'
 
 	if options.hexa:
-		fmt = hexpar
+		fmt = formatter(hexs, hexwidth)
 	elif options.decimal:
-		fmt = decpar
+		fmt = formatter(decs, decwidth)
 	elif options.binary:
-		fmt = binpar
+		fmt = formatter(bins, binwidth)
 	else:
 		fmt = lambda x: x
 
@@ -87,6 +84,7 @@ group = parser.add_argument_group("Format")
 group.add_argument("--hex", dest="hexa", action="store_true", help="")
 group.add_argument("--binary", action="store_true", help="")
 group.add_argument("--decimal", action="store_true", help="")
+group.add_argument("--width", default=8, type=int, help="how much bytes to display in a line")
 
 group = parser.add_argument_group("Prompt")
 group.add_argument("--prompt", metavar="STR", default="> ", help="show STR as prompt; might include strftime-like formatting")
