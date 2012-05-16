@@ -61,8 +61,8 @@ else:
 
 fmt  = args.timestamp and "{timestamp} " or ""
 fmt += args.date      and "{date} " or ""
-fmt += args.seconds   and "{sec:.2f} " or ""
-fmt += "{line}"
+fmt += args.seconds   and "{sec: 6.2f} " or ""
+fmt += fmt and "| {line}" or "{line}"
 
 try:
 	tstart = time.time()
