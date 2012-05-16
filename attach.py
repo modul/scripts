@@ -230,15 +230,15 @@ if __name__ == "__main__":
 					sys.exit(1)
 
 			if origlines[0].startswith("#!"): 
-				idx = 1
+				skip = 1
 			else:
 				if search("coding[:=]", origlines[0]):
-					idx = 1
-				else: idx = 0
+					skip = 1
+				else: skip = 0
 			if search("coding[:=]", origlines[1]):
-				idx = 2
+				skip = 2
 
-		origlines.insert(idx, patch+'\n\n')
+		origlines.insert(skip, patch+'\n\n')
 
 		try:
 			if args.backup:
