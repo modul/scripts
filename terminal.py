@@ -37,7 +37,7 @@ fm_par = lambda conv, bwidth: lambda width: lambda text: fill(conv(text), bwidth
 no_par = lambda: lambda width: lambda text: text
 
 def factory(options, port):
-	''' Build helper functions based on settings in 'options'. '''
+	''' Build helper functions based on 'options'. '''
 	from time import strftime
 
 	fmt = options.converter(options.width)
@@ -55,7 +55,22 @@ def factory(options, port):
 	else:
 		prompt = lambda: raw_input(pstr())
 
-	return prompt, fmt
+	if options.quiet is True:
+		def printer(text):
+			pass
+	else:
+		def printer(text):
+			print text,
+	
+	if options.logfile:
+		def logger(text):
+			print >>options.logfile, text,
+			args.logfile.flush()
+	else:
+		def logger(text):
+			pass
+
+	return prompt, fmt, printer, logger
 
 #----------------------------------------------------------
 
@@ -97,7 +112,7 @@ except serial.serialutil.SerialException as msg:
 
 #----------------------------------------------------------
 
-prompt, formatter = factory(args, port)
+prompter, formatter, printer, logger = factory(args, port)
 
 if args.commands:
 	for cmd in args.commands:
@@ -106,11 +121,8 @@ if args.commands:
 	incoming = ''.join(port.readlines())
 	if incoming:
 		incoming = formatter(incoming)
-		if not args.quiet:
-			print incoming,
-		if args.logfile:
-			print >>args.logfile, incoming,
-			args.logfile.flush()
+		printer(incoming)
+		logger(incoming)
 	sys.exit(0)
 
 #----------------------------------------------------------
@@ -121,18 +133,14 @@ try:
 		incoming = ''.join(port.readlines())
 		if incoming:
 			incoming = formatter(incoming)
-			if not args.quiet:
-				print incoming,
-			if args.logfile:
-				print >> args.logfile, "< "+incoming,
-				args.logfile.flush()
+			printer(incoming)
+			logger("< "+incoming)
 
 		try:
-			cmd = prompt()
+			cmd = prompter()
 			if cmd:
 				port.write(cmd+eol)
-				if args.logfile:
-					print >> args.logfile, "> "+cmd
+				logger("> "+cmd+'\n')
 		except EOFError:
 			break
 
