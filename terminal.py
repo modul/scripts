@@ -24,10 +24,31 @@ import readline
 from textwrap import fill
 from argparse import FileType, ArgumentParser, REMAINDER
 
-__version__ = "0.2"
+__version__ = "0.2.1"
+
+hexwidth, binwidth, decwidth = 3, 9, 4
+hexnum, binnum, decnum = 16, 8, 16
+
+hexs = lambda text: (len(text)*"{:02x} ").format(*bytearray(text))
+bins = lambda text: (len(text)*"{:08b} ").format(*bytearray(text))
+decs = lambda text: (len(text)*"{: 3d} ").format(*bytearray(text))
+hexpar = lambda text: fill(hexs(text), hexnum*hexwidth)+'\n'
+binpar = lambda text: fill(bins(text), binnum*binwidth)+'\n'
+decpar = lambda text: fill(decs(text), decnum*decwidth)+'\n'
 
 def factory(options, port):
+	''' Build helper functions based on settings in 'options'. '''
 	from time import strftime
+
+	if options.hexa:
+		fmt = hexpar
+	elif options.decimal:
+		fmt = decpar
+	elif options.binary:
+		fmt = binpar
+	else:
+		fmt = lambda x: x
+
 	if '%' in options.prompt:
 		pstr = lambda: strftime(options.prompt)
 	else:
@@ -36,12 +57,12 @@ def factory(options, port):
 	if options.prompt_cmd:
 		def prompt():
 			port.write(options.prompt_cmd + options.eol)
-			incoming = port.readline().strip()
+			incoming = fmt(port.readline()).strip()
 			return raw_input(incoming + pstr())
 	else:
 		prompt = lambda: raw_input(pstr())
-	
-	return prompt
+
+	return prompt, fmt
 
 #----------------------------------------------------------
 
@@ -62,6 +83,11 @@ parser.add_argument("--timeout", metavar="SEC", default=0.5, type=float, help="s
 parser.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr"], help="choose end of line characters")
 parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="log everything to FILE")
 
+group = parser.add_argument_group("Format")
+group.add_argument("--hex", dest="hexa", action="store_true", help="")
+group.add_argument("--binary", action="store_true", help="")
+group.add_argument("--decimal", action="store_true", help="")
+
 group = parser.add_argument_group("Prompt")
 group.add_argument("--prompt", metavar="STR", default="> ", help="show STR as prompt; might include strftime-like formatting")
 group.add_argument("--prompt-cmd", metavar="CMD", help="show response to CMD in every prompt")
@@ -77,12 +103,15 @@ except serial.serialutil.SerialException as msg:
 
 #----------------------------------------------------------
 
+prompt, formatter = factory(args, port)
+
 if args.commands:
 	for cmd in args.commands:
 		port.write(cmd+eol)
 
 	incoming = ''.join(port.readlines())
 	if incoming:
+		incoming = formatter(incoming)
 		if not args.quiet:
 			print incoming,
 		if args.logfile:
@@ -92,12 +121,12 @@ if args.commands:
 
 #----------------------------------------------------------
 
-prompt = factory(args, port)
 try:
 
 	while 1:
 		incoming = ''.join(port.readlines())
 		if incoming:
+			incoming = formatter(incoming)
 			if not args.quiet:
 				print incoming,
 			if args.logfile:
