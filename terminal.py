@@ -21,11 +21,29 @@
 import sys
 import serial
 import readline
-from time import strftime
 from textwrap import fill
 from argparse import FileType, ArgumentParser, REMAINDER
 
 __version__ = "0.2"
+
+def factory(options, port):
+	from time import strftime
+	if '%' in options.prompt:
+		pstr = lambda: strftime(options.prompt)
+	else:
+		pstr = lambda: options.prompt
+	
+	if options.prompt_cmd:
+		def prompt():
+			port.write(options.prompt_cmd + options.eol)
+			incoming = port.readline().strip()
+			return raw_input(incoming + pstr())
+	else:
+		prompt = lambda: raw_input(pstr())
+	
+	return prompt
+
+#----------------------------------------------------------
 
 parser = ArgumentParser()
 parser.usage = "%(prog)s device [command, ...] [options]"
@@ -49,7 +67,7 @@ group.add_argument("--prompt", metavar="STR", default="> ", help="show STR as pr
 group.add_argument("--prompt-cmd", metavar="CMD", help="show response to CMD in every prompt")
 
 args = parser.parse_args()
-eol = args.eol.replace("lf", "\n").replace("cr", "\r")
+eol  = args.eol = args.eol.replace("lf", "\n").replace("cr", "\r")
 
 try:
 	port = serial.Serial(args.device, args.baudrate, timeout=args.timeout)
@@ -57,27 +75,7 @@ except serial.serialutil.SerialException as msg:
 	print msg
 	sys.exit(1)
 
-
-def promptcmd(cmd=args.prompt_cmd, port=port, eol=eol):
-	ret = ""
-	if cmd and port:
-		port.write(cmd+eol)
-		ret = port.readline()
-		if ret.endswith("\n"):
-			ret = ret[:-1]
-	return ret
-
-
-if "%" in args.prompt:
-	prmstr = lambda: strftime(args.prompt)
-else:
-	prmstr = lambda: args.prompt
-
-if args.prompt_cmd:
-	prompt = lambda: promptcmd(args.prompt_cmd, port, eol) + " " + prmstr()
-else:
-	prompt = prmstr
-
+#----------------------------------------------------------
 
 if args.commands:
 	for cmd in args.commands:
@@ -92,8 +90,11 @@ if args.commands:
 			args.logfile.flush()
 	sys.exit(0)
 
+#----------------------------------------------------------
 
+prompt = factory(args, port)
 try:
+
 	while 1:
 		incoming = ''.join(port.readlines())
 		if incoming:
@@ -104,7 +105,7 @@ try:
 				args.logfile.flush()
 
 		try:
-			cmd = raw_input(prompt())
+			cmd = prompt()
 			if cmd:
 				port.write(cmd+eol)
 				if args.logfile:
