@@ -22,29 +22,25 @@ import sys
 import serial
 import readline
 from argparse import FileType, ArgumentParser
+from textwrap import fill
 
 __version__ = "0.2.1"
 
+# convert bytestring to hex, bin or decimal:
 hexwidth, binwidth, decwidth = 3, 9, 4 # number of digits + 1 space
 hexs = lambda text: (len(text)*"{:02x} ").format(*bytearray(text))
 bins = lambda text: (len(text)*"{:08b} ").format(*bytearray(text))
 decs = lambda text: (len(text)*"{: 3d} ").format(*bytearray(text))
 
+# build functions to do or do not format paragraphs:
+fm_par = lambda conv, bwidth: lambda width: lambda text: fill(conv(text), bwidth*width)+'\n'
+no_par = lambda: lambda width: lambda text: text
+
 def factory(options, port):
 	''' Build helper functions based on settings in 'options'. '''
 	from time import strftime
-	from textwrap import fill
 
-	formatter = lambda conv, bwidth: lambda text: fill(conv(text), bwidth*options.width)+'\n'
-
-	if options.hexa:
-		fmt = formatter(hexs, hexwidth)
-	elif options.decimal:
-		fmt = formatter(decs, decwidth)
-	elif options.binary:
-		fmt = formatter(bins, binwidth)
-	else:
-		fmt = lambda x: x
+	fmt = options.converter(options.width)
 
 	if '%' in options.prompt:
 		pstr = lambda: strftime(options.prompt)
@@ -81,9 +77,9 @@ parser.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr"], help="c
 parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="log everything to FILE")
 
 group = parser.add_argument_group("Format")
-group.add_argument("--hex", dest="hexa", action="store_true", help="")
-group.add_argument("--binary", action="store_true", help="")
-group.add_argument("--decimal", action="store_true", help="")
+group.add_argument("--hex", dest="converter", action="store_const", const=fm_par(hexs, hexwidth), default=no_par())
+group.add_argument("--binary", dest="converter", action="store_const", const=fm_par(bins, binwidth), default=no_par())
+group.add_argument("--decimal", dest="converter", action="store_const", const=fm_par(decs, decwidth), default=no_par())
 group.add_argument("--width", default=8, type=int, help="how much bytes to display in a line")
 
 group = parser.add_argument_group("Prompt")
