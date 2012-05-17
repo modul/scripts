@@ -23,7 +23,6 @@ import sys
 from time import strftime
 from re import search
 from shutil import copy
-from itertools import count
 from argparse import ArgumentParser
 
 headers = {'none': ''}
@@ -141,7 +140,7 @@ All rights reversed.
 def commentblock(text, s):
 	if s == "none":
 		return text
-	comment = lambda s: '\n'.join(map(lambda x: s+x, text.splitlines()))
+	comment = lambda s: '\n'.join(s+x for x in text.splitlines())
 	if s == '"""' or s == "'''":
 		return s+'\n'+comment('')+'\n'+s
 	elif s == "/*":
@@ -225,7 +224,7 @@ if __name__ == "__main__":
 
 		skip = 0
 		if len(origlines) > 0:
-			for oline, i in zip(origlines[:10], count()):
+			for i, oline in enumerate(origlines[:10]):
 				if len(oline) > 3 and oline in patch and not args.force:
 					print "{}: line {} kind of matches, file seems to have this header already.".format(filename, i)
 					sys.exit(1)
