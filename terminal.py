@@ -26,6 +26,8 @@ from textwrap import fill
 
 __version__ = "0.2.1"
 
+### Convert bytes of strings to hex, binary or decimal dumps ###
+
 def digits(converter):
 	''' Returns the number of digits produced by converter '''
 	if converter is None:
@@ -52,47 +54,29 @@ def convert(text, converter):
 	''' Converts text to hex, bin or decimal dump '''
 	return ' '.join(converter(text))
 
-def make_formatter(converter):
-	''' Return a function to build a paragraph formatting function
-	for string dumps.
-	converter is one of hexs, bins, decs.
-
-	The resulting function takes one argument to define the number of
-	bytes to be on one line. The result of that function returns a dump
-	of the input string (in hex, binary or decimal, with paragraphs etc).
-
-	When converter is None, the resulting functions behave the same
-	but the input string will be returned untouched.
-
-	>>> fmtr = make_formatter(hexs)
-	>>> dump = fmtr(2)
-	>>> print dump("Hello\n")
-	68 65
-	6c 6c
-	6f 0a
-	>>> fmtr = make_formatter(None)
-	>>> dump = fmtr(2)
-	>>> print dump("Hello\n")
-	Hello
-	
-	>>> 
+def paragraph(text, bytelen, bytenum):
+	''' Formats a string dump text with paragraphs.
+	bytelen is the number of characters needed for one byte (digits),
+	bytenum is the number of bytes to be on one line.
 	'''
-	bytewidth = digits(converter)+1
-	def mk_fmt(numbytes):
-		if converter is None:
-			def fmt(text):
-				return text
-		else:
-			def fmt(text):
-				return fill(convert(text, converter), bytewidth*numbytes)+'\n'
-		return fmt
-	return mk_fmt
+	return fill(text, (bytelen+1)*bytenum)+'\n'
+
+
+### Process command line arguments ###
 
 def factory(options, port):
 	''' Build helper functions based on 'options'. '''
 	from time import strftime
 
-	fmt = options.converter(options.width)
+	if options.converter is None:
+		def fmt(text):
+			return text
+	else:
+		def fmt(text):
+			return paragraph( \
+					convert(text, options.converter),\
+					digits(options.converter)+1,\
+					options.width)
 
 	if '%' in options.prompt:
 		pstr = lambda: strftime(options.prompt)
@@ -144,9 +128,9 @@ parser.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr"], help="c
 parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="log everything to FILE")
 
 group = parser.add_argument_group("Format")
-group.add_argument("--hex", dest="converter", action="store_const", const=make_formatter(hexs), default=make_formatter(None))
-group.add_argument("--binary", dest="converter", action="store_const", const=make_formatter(bins), default=make_formatter(None))
-group.add_argument("--decimal", dest="converter", action="store_const", const=make_formatter(decs), default=make_formatter(None))
+group.add_argument("--hex", dest="converter", action="store_const", const=hexs, default=None)
+group.add_argument("--binary", dest="converter", action="store_const", const=bins, default=None)
+group.add_argument("--decimal", dest="converter", action="store_const", const=decs, default=None)
 group.add_argument("--width", default=8, type=int, help="how much bytes to display in a line")
 
 group = parser.add_argument_group("Prompt")
