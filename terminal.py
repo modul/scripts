@@ -62,51 +62,67 @@ def paragraph(text, bytelen, bytenum):
 	return fill(text, (bytelen+1)*bytenum)+'\n'
 
 
-### Process command line arguments ###
+### Process command line arguments and build helper functions ###
 
-def factory(options, port):
-	''' Build helper functions based on 'options'. '''
-	from time import strftime
-
-	if options.converter is None:
+def formatter(converter=None, width=0):
+	''' Build a string formatting function.
+	If converter is one of hexs, bins or decs, width is the number of bytes
+	to put on one line. If converter is None, given text is returned
+	untouched. '''
+	if converter:
+		def fmt(text):
+			return paragraph(
+					convert(text, converter),
+					digits(converter),
+					width)
+	else:
 		def fmt(text):
 			return text
-	else:
-		def fmt(text):
-			return paragraph( \
-					convert(text, options.converter),\
-					digits(options.converter)+1,\
-					options.width)
+	return fmt
 
-	if '%' in options.prompt:
-		pstr = lambda: strftime(options.prompt)
+def prompter(promptstr, cmd=None, port=None):
+	''' Build a function that asks for input, printing a prompt based on 
+	arguments. 
+	promptstr might include strftime-like patterns. If cmd and port is given,
+	cmd is sent through port and the response gets prepended to each prompt.
+	'''
+	from time import strftime
+	if '%' in promptstr:
+		pstr = lambda: strftime(promptstr)
 	else:
-		pstr = lambda: options.prompt
+		pstr = lambda: promptstr
 	
-	if options.prompt_cmd:
+	if cmd and port:
 		def prompt():
-			port.write(options.prompt_cmd + options.eol)
+			port.write(cmd)
 			incoming = fmt(port.readline()).strip()
 			return raw_input(incoming + pstr())
 	else:
 		prompt = lambda: raw_input(pstr())
+	return prompt
 
-	if options.quiet is True:
-		def printer(text):
+def printer(quiet=False):
+	''' Build a function that prints text if quiet is True, otherwise 
+	the function does nothing.
+	'''
+	if quiet:
+		def printit(text):
 			pass
 	else:
-		def printer(text):
+		def printit(text):
 			print text,
-	
-	if options.logfile:
-		def logger(text):
-			print >>options.logfile, text,
-			args.logfile.flush()
-	else:
-		def logger(text):
-			pass
+	return printit
 
-	return prompt, fmt, printer, logger
+def logger(fp=None):
+	''' Build a function that logs text	to fp if present, or does nothing. '''
+	if fp:
+		def logit(text):
+			print >> fp, text,
+			fp.flush()
+	else:
+		def logit(text):
+			pass
+	return logit
 
 #----------------------------------------------------------
 
@@ -148,7 +164,12 @@ except serial.serialutil.SerialException as msg:
 
 #----------------------------------------------------------
 
-prompter, formatter, printer, logger = factory(args, port)
+cmd = args.prompt_cmd and args.prompt_cmd+args.eol or None
+
+logit    = logger(args.logfile)
+printit  = printer(args.quiet)
+prompt   = prompter(args.prompt, cmd, port)
+formatit = formatter(args.converter, args.width)
 
 if args.commands:
 	for cmd in args.commands:
@@ -156,9 +177,9 @@ if args.commands:
 
 	incoming = ''.join(port.readlines())
 	if incoming:
-		incoming = formatter(incoming)
-		printer(incoming)
-		logger(incoming)
+		incoming = formatit(incoming)
+		printit(incoming)
+		logit(incoming)
 	sys.exit(0)
 
 #----------------------------------------------------------
@@ -168,15 +189,15 @@ try:
 	while 1:
 		incoming = ''.join(port.readlines())
 		if incoming:
-			incoming = formatter(incoming)
-			printer(incoming)
-			logger("< "+incoming)
+			incoming = formatit(incoming)
+			printit(incoming)
+			logit("< "+incoming)
 
 		try:
-			cmd = prompter()
+			cmd = prompt()
 			if cmd:
 				port.write(cmd+eol)
-				logger("> "+cmd+'\n')
+				logit("> "+cmd+'\n')
 		except EOFError:
 			break
 
