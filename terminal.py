@@ -50,18 +50,6 @@ def decs(text):
 	for x in bytearray(text):
 		yield "{: 3d}".format(x)
 
-def convert(text, converter):
-	''' Converts text to hex, bin or decimal dump '''
-	return ' '.join(converter(text))
-
-def paragraph(text, bytelen, bytenum):
-	''' Formats a string dump text with paragraphs.
-	bytelen is the number of characters needed for one byte (digits),
-	bytenum is the number of bytes to be on one line.
-	'''
-	return fill(text, (bytelen+1)*bytenum)+'\n'
-
-
 ### Process command line arguments and build helper functions ###
 
 def formatter(converter=None, width=0):
@@ -70,11 +58,10 @@ def formatter(converter=None, width=0):
 	to put on one line. If converter is None, given text is returned
 	untouched. '''
 	if converter:
+		chars = width * (digits(converter) + 1)
 		def fmt(text):
-			return paragraph(
-					convert(text, converter),
-					digits(converter),
-					width)
+			txt = ' '.join(converter(text))
+			return fill(txt, chars)+'\n'
 	else:
 		def fmt(text):
 			return text
