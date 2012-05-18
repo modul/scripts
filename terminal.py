@@ -111,6 +111,35 @@ def logger(fp=None):
 			pass
 	return logit
 
+def sender(port=None, eol='\n'):
+	''' Build a function that sends arbitrary text (including 
+	newline characters) through port.
+	'''
+	if port:
+		def send(text):
+			port.write(text+eol)
+	else:
+		def send(text):
+			pass
+	return send
+
+def receiver(port=None, fmt=None):
+	''' Build a function that reads all input from port and returns it,
+	formatted using fmt, if given. 
+	'''
+	if port:
+		if fmt:
+			def receive():
+				return fmt(''.join(port.readlines()))
+		else:
+			def receive():
+				return ''.join(port.readlines())
+	else:
+		def receive():
+			pass
+	return receive
+
+
 #----------------------------------------------------------
 
 parser = ArgumentParser()
@@ -157,14 +186,15 @@ logit    = logger(args.logfile)
 printit  = printer(args.quiet)
 prompt   = prompter(args.prompt, cmd, port)
 formatit = formatter(args.converter, args.width)
+send     = sender(port, args.eol)
+receive  = receiver(port, formatit)
 
 if args.commands:
 	for cmd in args.commands:
-		port.write(cmd+eol)
+		send(cmd)
 
-	incoming = ''.join(port.readlines())
+	incoming = receive()
 	if incoming:
-		incoming = formatit(incoming)
 		printit(incoming)
 		logit(incoming)
 	sys.exit(0)
@@ -174,16 +204,15 @@ if args.commands:
 try:
 
 	while 1:
-		incoming = ''.join(port.readlines())
+		incoming = receive()
 		if incoming:
-			incoming = formatit(incoming)
 			printit(incoming)
 			logit("< "+incoming)
 
 		try:
 			cmd = prompt()
 			if cmd:
-				port.write(cmd+eol)
+				send(cmd)
 				logit("> "+cmd+'\n')
 		except EOFError:
 			break
