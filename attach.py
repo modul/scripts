@@ -23,6 +23,7 @@ import sys
 from time import strftime
 from re import search
 from shutil import copy
+from os.path import isfile
 from argparse import ArgumentParser
 
 headers = {'none': ''}
@@ -165,12 +166,13 @@ def getheader(name):
 	return ''
 
 def getlines(filename):
-	try:
-		with open(filename) as fp:
-			return fp.readlines()
-	except IOError as msg:
-		print "original:", msg
-		return None
+	if isfile(filename): # if not, just create it later
+		try:
+			with open(filename) as fp:
+				return fp.readlines()
+		except IOError as msg:
+			print "original:", msg
+			return None
 	return []
 
 
@@ -216,14 +218,14 @@ if __name__ == "__main__":
 		sys.exit(0)
 
 	for filename in args.filenames:
-		idx = 0
 		origlines = getlines(filename)
 
 		if origlines is None:
 			continue
 
-		skip = 0
-		if len(origlines) > 0:
+		if origlines:
+			action = "patched"
+
 			for i, oline in enumerate(origlines[:10]):
 				if len(oline) > 3 and oline in patch and not args.force:
 					print "{}: line {} kind of matches, file seems to have this header already.".format(filename, i)
@@ -237,17 +239,23 @@ if __name__ == "__main__":
 				else: skip = 0
 			if search("coding[:=]", origlines[1]):
 				skip = 2
+		else:
+			skip = 0
+			action = "created"
 
 		origlines.insert(skip, patch+'\n\n')
 
 		try:
-			if args.backup:
+			if args.backup and action == "patched":
 				copy(filename, filename+'~')
 				print "backed up", filename
+
 			with open(filename, "w") as fp:
 				fp.writelines(origlines)
+
 		except IOError as msg:
 			print msg
 			continue
+
 		else:
-			print "patched", filename
+			print action, filename
