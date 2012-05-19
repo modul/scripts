@@ -7,7 +7,7 @@
 # this stuff is worth it, you can buy me a beer in return - Remo Giermann.
 # ----------------------------------------------------------------------------
 #
-# Very simple serial terminal
+# Simple serial terminal - with some practical options and features.
 #
 # If serial data is present, prints it.
 # Afterwards, in any case, waits for user input.
@@ -22,18 +22,16 @@ import sys
 import serial
 import readline
 from argparse import FileType, ArgumentParser
-from textwrap import fill
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
-### Convert bytes of strings to hex, binary or decimal dumps ###
+### Converters for hex, binary or decimal dumps ###
 
 def digits(converter):
 	''' Returns the number of digits produced by converter '''
 	if converter is None:
 		return 0
-	else:
-		return len(converter("\xff").next())
+	return len(converter("\xff").next())
 
 def hexs(text):
 	''' Yields hex representation for bytes in text '''
@@ -50,13 +48,15 @@ def decs(text):
 	for x in bytearray(text):
 		yield "{: 3d}".format(x)
 
-### Process command line arguments and build helper functions ###
+### Build helper functions based on options ###
 
 def formatter(converter=None, width=0):
 	''' Build a string formatting function.
 	If converter is one of hexs, bins or decs, width is the number of bytes
 	to put on one line. If converter is None, given text is returned
-	untouched. '''
+	untouched. 
+	'''
+	from textwrap import fill
 	if converter:
 		chars = width * (digits(converter) + 1)
 		def fmt(text):
@@ -88,7 +88,7 @@ def prompter(promptstr, cmd=None, port=None):
 		prompt = lambda: raw_input(pstr())
 	return prompt
 
-#----------------------------------------------------------
+### Setup commandline arguments ###
 
 parser = ArgumentParser()
 parser.usage = "%(prog)s device [command, ...] [options]"
@@ -117,6 +117,9 @@ group = parser.add_argument_group("Prompt")
 group.add_argument("--prompt", metavar="STR", default="> ", help="show STR as prompt; might include strftime-like formatting")
 group.add_argument("--prompt-cmd", metavar="CMD", help="show response to CMD in every prompt")
 
+
+### Parse commandline and setup environment ###
+
 args = parser.parse_args()
 args.eol = args.eol.replace("lf", "\n").replace("cr", "\r").replace("none", "")
 
@@ -126,12 +129,12 @@ except serial.serialutil.SerialException as msg:
 	print msg
 	sys.exit(1)
 
-#----------------------------------------------------------
-
 cmd = args.prompt_cmd and args.prompt_cmd+args.eol or None
 
 fmt = formatter(args.converter, args.width)
 prompt = prompter(args.prompt, cmd, port)
+
+### Fire and forget commands given on commandline ###
 
 if args.commands:
 	for cmd in args.commands:
@@ -146,7 +149,7 @@ if args.commands:
 			args.logfile.flush()
 	sys.exit(0)
 
-#----------------------------------------------------------
+### Main terminal loop ###
 
 try:
 
