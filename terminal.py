@@ -170,7 +170,7 @@ group.add_argument("--prompt", metavar="STR", default="> ", help="show STR as pr
 group.add_argument("--prompt-cmd", metavar="CMD", help="show response to CMD in every prompt")
 
 args = parser.parse_args()
-eol  = args.eol = args.eol.replace("lf", "\n").replace("cr", "\r").replace("none", "")
+args.eol = args.eol.replace("lf", "\n").replace("cr", "\r").replace("none", "")
 
 try:
 	port = serial.Serial(args.device, args.baudrate, timeout=args.timeout)
