@@ -97,14 +97,14 @@ def printer(quiet=False):
 			pass
 	else:
 		def printit(text):
-			print text,
+			print text.strip()
 	return printit
 
 def logger(fp=None):
-	''' Build a function that logs text	to fp if present, or does nothing. '''
+	''' Build a function that logs text to fp if present, or does nothing. '''
 	if fp:
 		def logit(text):
-			print >> fp, text,
+			print >> fp, text.strip()
 			fp.flush()
 	else:
 		def logit(text):
