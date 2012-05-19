@@ -156,8 +156,8 @@ parser.add_argument("-v", "--version", action="version", version="%(prog)s "+__v
 parser.add_argument("-q", "--quiet", action="store_true", help="don't print responses to stdout")
 parser.add_argument("--baudrate", metavar="BAUD", default=115200, type=int, help="set baudrate (115200)")
 parser.add_argument("--timeout", metavar="SEC", default=0.5, type=float, help="set read timeout (0.5)")
-parser.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr"], help="choose end of line characters")
 parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="log everything to FILE")
+parser.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr", "lfcr", "none"], help="choose end of line characters (lf)")
 
 group = parser.add_argument_group("Format")
 group.add_argument("--hex", dest="converter", action="store_const", const=hexs, default=None)
@@ -170,7 +170,7 @@ group.add_argument("--prompt", metavar="STR", default="> ", help="show STR as pr
 group.add_argument("--prompt-cmd", metavar="CMD", help="show response to CMD in every prompt")
 
 args = parser.parse_args()
-eol  = args.eol = args.eol.replace("lf", "\n").replace("cr", "\r")
+eol  = args.eol = args.eol.replace("lf", "\n").replace("cr", "\r").replace("none", "")
 
 try:
 	port = serial.Serial(args.device, args.baudrate, timeout=args.timeout)
