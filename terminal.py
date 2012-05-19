@@ -64,7 +64,7 @@ def formatter(converter=None, width=0):
 			return fill(txt, chars)
 	else:
 		def fmt(text):
-			return text
+			return text.strip()
 	return fmt
 
 def prompter(promptstr, cmd=None, port=None):
@@ -87,58 +87,6 @@ def prompter(promptstr, cmd=None, port=None):
 	else:
 		prompt = lambda: raw_input(pstr())
 	return prompt
-
-def printer(quiet=False):
-	''' Build a function that prints text if quiet is True, otherwise 
-	the function does nothing.
-	'''
-	if quiet:
-		def printit(text):
-			pass
-	else:
-		def printit(text):
-			print text.strip()
-	return printit
-
-def logger(fp=None):
-	''' Build a function that logs text to fp if present, or does nothing. '''
-	if fp:
-		def logit(text):
-			print >> fp, text.strip()
-			fp.flush()
-	else:
-		def logit(text):
-			pass
-	return logit
-
-def sender(port=None, eol='\n'):
-	''' Build a function that sends arbitrary text (including 
-	newline characters) through port.
-	'''
-	if port:
-		def send(text):
-			port.write(text+eol)
-	else:
-		def send(text):
-			pass
-	return send
-
-def receiver(port=None, convert=None, width=0):
-	''' Build a function that reads all input from port and returns it,
-	formatted using convert and width, if given.
-	'''
-	fmt = formatter(convert, width)
-	if port:
-		def receive():
-			text = ''.join(port.readlines())
-			if text:
-				text = fmt(text) + '\n'
-			return text
-	else:
-		def receive():
-			pass
-	return receive
-
 
 #----------------------------------------------------------
 
@@ -182,20 +130,20 @@ except serial.serialutil.SerialException as msg:
 
 cmd = args.prompt_cmd and args.prompt_cmd+args.eol or None
 
-logit    = logger(args.logfile)
-printit  = printer(args.quiet)
-prompt   = prompter(args.prompt, cmd, port)
-send     = sender(port, args.eol)
-receive  = receiver(port, args.converter, args.width)
+fmt = formatter(args.converter, args.width)
+prompt = prompter(args.prompt, cmd, port)
 
 if args.commands:
 	for cmd in args.commands:
-		send(cmd)
+		print >> port, cmd + args.eol
 
-	incoming = receive()
+	incoming = ''.join(port.readlines())
 	if incoming:
-		printit(incoming)
-		logit(incoming)
+		if not args.quiet:
+			print fmt(incoming)
+		if args.logfile:
+			print >> args.logfile, fmt(incoming)
+			args.logfile.flush()
 	sys.exit(0)
 
 #----------------------------------------------------------
@@ -203,16 +151,20 @@ if args.commands:
 try:
 
 	while 1:
-		incoming = receive()
+		incoming = ''.join(port.readlines())
 		if incoming:
-			printit(incoming)
-			logit("< "+incoming)
+			if not args.quiet:
+				print fmt(incoming)
+			if args.logfile:
+				print >> args.logfile, '<', fmt(incoming)
+				args.logfile.flush()
 
 		try:
 			cmd = prompt()
 			if cmd:
-				send(cmd)
-				logit("> "+cmd)
+				print >> port, cmd + args.eol
+				if args.logfile:
+					print >> args.logfile, '>', cmd
 		except EOFError:
 			break
 
