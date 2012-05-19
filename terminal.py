@@ -61,7 +61,7 @@ def formatter(converter=None, width=0):
 		chars = width * (digits(converter) + 1)
 		def fmt(text):
 			txt = ' '.join(converter(text))
-			return fill(txt, chars)+'\n'
+			return fill(txt, chars)
 	else:
 		def fmt(text):
 			return text
@@ -123,17 +123,17 @@ def sender(port=None, eol='\n'):
 			pass
 	return send
 
-def receiver(port=None, fmt=None):
+def receiver(port=None, convert=None, width=0):
 	''' Build a function that reads all input from port and returns it,
-	formatted using fmt, if given. 
+	formatted using convert and width, if given.
 	'''
+	fmt = formatter(convert, width)
 	if port:
-		if fmt:
-			def receive():
-				return fmt(''.join(port.readlines()))
-		else:
-			def receive():
-				return ''.join(port.readlines())
+		def receive():
+			text = ''.join(port.readlines())
+			if text:
+				text = fmt(text) + '\n'
+			return text
 	else:
 		def receive():
 			pass
@@ -185,9 +185,8 @@ cmd = args.prompt_cmd and args.prompt_cmd+args.eol or None
 logit    = logger(args.logfile)
 printit  = printer(args.quiet)
 prompt   = prompter(args.prompt, cmd, port)
-formatit = formatter(args.converter, args.width)
 send     = sender(port, args.eol)
-receive  = receiver(port, formatit)
+receive  = receiver(port, args.converter, args.width)
 
 if args.commands:
 	for cmd in args.commands:
