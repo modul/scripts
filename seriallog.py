@@ -25,21 +25,37 @@ from argparse import FileType, ArgumentParser
 
 __version__ = "0.2"
 
-def formatter(do_timestamp=False, do_date=False, do_sec=False, datefmt="%Y/%m/%d %H:%M:%S"):
-	''' Build a function that prepends some time information to a string 
-	based on the choices do_timestamp, do_date, do_sec.
-	'''
-	fmt  = do_timestamp and "{timestamp} " or ""
-	fmt += do_date      and "{date} " or ""
-	fmt += do_sec   and "{sec: 6.2f} " or ""
-	fmt += fmt and "| {line}" or "{line}"
+def mk_date(fmt):
+	''' Return a wrapper for strftime(fmt) '''
+	def date():
+		return time.strftime(fmt)
+	return date
 
-	tstart = time.time()
+def mk_tstamp():
+	''' Return a wrapper for getting a timestamp-string '''
+	def timestamp():
+		return str(int(time.time()))
+	return timestamp
+
+def mk_seconds(start):
+	''' Return a wrapper to get the str-formatted seconds since 'start' '''
+	def seconds():
+		return "{:6.2f}".format(time.time()-start)
+	return seconds
+
+def formatter(flist=[], sep="|"):
+	''' Build a function that prepends some info strings to a string.
+	Strings to be prepended are retrieved by calling functions in flist.
+	'''
+	def pieces(line):
+		for f in flist:
+			if callable(f):
+				yield f()
+		yield sep
+		yield line
+
 	def _formatter(line):
-		return fmt.format(line=line,
-					timestamp=int(time.time()),
-					date=time.strftime(datefmt),
-					sec=time.time()-tstart)
+		return ' '.join(pieces(line))
 	return _formatter
 
 
@@ -54,9 +70,9 @@ parser.add_argument("--baudrate", metavar="BAUD", default=115200, type=int, help
 parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="write output to logfile")
 
 group = parser.add_argument_group(title="Timestamps")
-group.add_argument("--date", action="store_true", help="prepend time and date")
-group.add_argument("--timestamp", action="store_true", help="prepend timestamp")
-group.add_argument("--seconds", action="store_true", help="prepend seconds since start")
+group.add_argument("--date", action="append_const", dest="timestamps", const=mk_date("%Y/%m/%d %H:%M:%S"), help="prepend time and date", default=None)
+group.add_argument("--timestamp", action="append_const", dest="timestamps", const=mk_tstamp(), help="prepend timestamp", default=None)
+group.add_argument("--seconds", action="append_const", dest="timestamps", const=mk_seconds(time.time()), help="prepend seconds since start", default=None)
 
 group = parser.add_argument_group(title="Sending")
 group.add_argument("--send", metavar="CMD", nargs="+", help="send serial commands, then read")
@@ -75,7 +91,7 @@ else:
 	if args.logfile:
 		print "opened %s for logging" % (args.logfile.name)
 
-fmt = formatter(args.timestamp, args.date, args.seconds)
+fmt = formatter(args.timestamps)
 
 try:
 	while 1:
