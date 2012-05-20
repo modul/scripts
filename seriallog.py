@@ -76,10 +76,10 @@ group.add_argument("--seconds", action="append_const", dest="timestamps", const=
 
 group = parser.add_argument_group(title="Sending")
 group.add_argument("--send", metavar="CMD", nargs="+", help="send serial commands, then read")
-group.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr"], help="choose end of line characters")
+group.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr", "lfcr", "none"], help="choose end of line characters (lf)")
 
 args = parser.parse_args()
-eol = args.eol.replace("lf", "\n").replace("cr", "\r")
+eol = args.eol.replace("lf", "\n").replace("cr", "\r").replace("none", "")
 
 try:
 	port = serial.Serial(args.device, args.baudrate, timeout=args.interval)
