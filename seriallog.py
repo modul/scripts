@@ -23,7 +23,7 @@ import serial
 import time
 from argparse import FileType, ArgumentParser
 
-__version__ = "0.2"
+__version__ = "0.3"
 
 def mk_date(fmt):
 	''' Return a wrapper for strftime(fmt) '''
@@ -43,16 +43,39 @@ def mk_seconds(start):
 		return "{:6.2f}".format(time.time()-start)
 	return seconds
 
-def formatter(flist=[], sep="|"):
-	''' Build a function that prepends some info strings to a string.
-	Strings to be prepended are retrieved by calling functions in flist.
+def hexs(text):
+	''' Yields hex representation for bytes in text '''
+	for x in bytearray(text):
+		yield "{:02x}".format(x)
+
+def bins(text):
+	''' Yields binary representation for bytes in text '''
+	for x in bytearray(text):
+		yield "{:08b}".format(x)
+
+def decs(text):
+	''' Yields decimal representation for bytes in text '''
+	for x in bytearray(text):
+		yield "{: 3d}".format(x)
+
+def formatter(flist=[], conv=None, sep="|"):
+	''' Build a function that prepends some info strings to a string,
+	which is, if conv is one of hexs, decs or bins, first converted
+	to a hex, decimal or binary dump.
+	Strings to be prepended are retrieved by calling functions in flist and
+	are separated from the base string using 'sep'.
 	'''
+	if not callable(conv):
+		convert = lambda text: text
+	else:
+		convert = lambda text: ' '.join(conv(text))+"\n"
+
 	def pieces(line):
 		for f in flist:
 			if callable(f):
 				yield f()
 		yield sep
-		yield line
+		yield convert(line)
 
 	def _formatter(line):
 		return ' '.join(pieces(line))
@@ -74,6 +97,11 @@ group.add_argument("--date", action="append_const", dest="timestamps", const=mk_
 group.add_argument("--timestamp", action="append_const", dest="timestamps", const=mk_tstamp(), help="prepend timestamp", default=None)
 group.add_argument("--seconds", action="append_const", dest="timestamps", const=mk_seconds(time.time()), help="prepend seconds since start", default=None)
 
+group = parser.add_argument_group("Format")
+group.add_argument("--hex", dest="converter", action="store_const", const=hexs, default=None, help="display responses as hex")
+group.add_argument("--binary", dest="converter", action="store_const", const=bins, default=None, help="display responses as decimal")
+group.add_argument("--decimal", dest="converter", action="store_const", const=decs, default=None, help="display responses as binary")
+
 group = parser.add_argument_group(title="Sending")
 group.add_argument("--send", metavar="CMD", nargs="+", help="send serial commands, then read")
 group.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr", "lfcr", "none"], help="choose end of line characters (lf)")
@@ -91,7 +119,7 @@ else:
 	if args.logfile:
 		print "opened %s for logging" % (args.logfile.name)
 
-fmt = formatter(args.timestamps)
+fmt = formatter(args.timestamps, args.converter)
 
 try:
 	while 1:
