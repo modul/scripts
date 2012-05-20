@@ -138,7 +138,7 @@ prompt = prompter(args.prompt, cmd, port)
 
 if args.commands:
 	for cmd in args.commands:
-		print >> port, cmd + args.eol
+		print >> port, cmd + args.eol,
 
 	incoming = ''.join(port.readlines())
 	if incoming:
@@ -165,7 +165,7 @@ try:
 		try:
 			cmd = prompt()
 			if cmd:
-				print >> port, cmd + args.eol
+				print >> port, cmd + args.eol,
 				if args.logfile:
 					print >> args.logfile, '>', cmd
 		except EOFError:
