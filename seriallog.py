@@ -25,6 +25,24 @@ from argparse import FileType, ArgumentParser
 
 __version__ = "0.2"
 
+def formatter(do_timestamp=False, do_date=False, do_sec=False, datefmt="%Y/%m/%d %H:%M:%S"):
+	''' Build a function that prepends some time information to a string 
+	based on the choices do_timestamp, do_date, do_sec.
+	'''
+	fmt  = do_timestamp and "{timestamp} " or ""
+	fmt += do_date      and "{date} " or ""
+	fmt += do_sec   and "{sec: 6.2f} " or ""
+	fmt += fmt and "| {line}" or "{line}"
+
+	tstart = time.time()
+	def _formatter(line):
+		return fmt.format(line=line,
+					timestamp=int(time.time()),
+					date=time.strftime(datefmt),
+					sec=time.time()-tstart)
+	return _formatter
+
+
 parser = ArgumentParser(description="Continuously read serial data", usage="%(prog)s [options] device")
 
 parser.add_argument("device", help="serial device to open")
@@ -44,7 +62,6 @@ group = parser.add_argument_group(title="Sending")
 group.add_argument("--send", metavar="CMD", nargs="+", help="send serial commands, then read")
 group.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr"], help="choose end of line characters")
 
-
 args = parser.parse_args()
 eol = args.eol.replace("lf", "\n").replace("cr", "\r")
 
@@ -58,14 +75,9 @@ else:
 	if args.logfile:
 		print "opened %s for logging" % (args.logfile.name)
 
-
-fmt  = args.timestamp and "{timestamp} " or ""
-fmt += args.date      and "{date} " or ""
-fmt += args.seconds   and "{sec: 6.2f} " or ""
-fmt += fmt and "| {line}" or "{line}"
+fmt = formatter(args.timestamp, args.date, args.seconds)
 
 try:
-	tstart = time.time()
 	while 1:
 		if args.send:
 			for cmd in args.send:
@@ -76,10 +88,7 @@ try:
 			continue
 
 		for line in incoming:
-			buf = fmt.format(line=line, \
-					timestamp=int(time.time()), \
-					date=time.strftime("%Y/%m/%d %H:%M:%S"), \
-					sec=time.time()-tstart)
+			buf = fmt(line)
 
 			if not args.quiet:
 				print buf,
