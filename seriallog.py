@@ -23,7 +23,7 @@ import serial
 import time
 from argparse import FileType, ArgumentParser
 
-__version__ = "0.3"
+__version__ = "0.3.1"
 
 def mk_date(fmt):
 	''' Return a wrapper for strftime(fmt) '''
@@ -125,20 +125,20 @@ try:
 	while 1:
 		if args.send:
 			for cmd in args.send:
-				port.write(cmd+eol)
+				print >> port, cmd+eol,
 
 		incoming = port.readlines()
 		if not incoming:
 			continue
 
 		for line in incoming:
-			buf = fmt(line)
+			buf = fmt(line).strip()
 
 			if not args.quiet:
-				print buf,
+				print buf
 
 			if args.logfile:
-				print >> args.logfile, buf,
+				print >> args.logfile, buf
 				args.logfile.flush()
 
 except KeyboardInterrupt:
