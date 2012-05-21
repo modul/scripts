@@ -23,30 +23,13 @@ import serial
 import readline
 from argparse import FileType, ArgumentParser
 
-__version__ = "0.2.2"
+__version__ = "0.2.3"
 
 ### Converters for hex, binary or decimal dumps ###
 
-def digits(converter):
-	''' Returns the number of digits produced by converter '''
-	if converter is None:
-		return 0
-	return len(converter("\xff").next())
-
-def hexs(text):
-	''' Yields hex representation for bytes in text '''
-	for x in bytearray(text):
-		yield "{:02x}".format(x)
-
-def bins(text):
-	''' Yields binary representation for bytes in text '''
-	for x in bytearray(text):
-		yield "{:08b}".format(x)
-
-def decs(text):
-	''' Yields decimal representation for bytes in text '''
-	for x in bytearray(text):
-		yield "{: 3d}".format(x)
+hexs = lambda text: ' '.join("{:02x}".format(x) for x in bytearray(text))
+bins = lambda text: ' '.join("{:08b}".format(x) for x in bytearray(text))
+decs = lambda text: ' '.join("{: 3d}".format(x) for x in bytearray(text))
 
 ### Build helper functions based on options ###
 
@@ -58,10 +41,10 @@ def formatter(converter=None, width=0):
 	'''
 	from textwrap import fill
 	if converter:
-		chars = width * (digits(converter) + 1)
+		digits = len(converter("\xff"))
+		chars = width * (digits + 1)
 		def fmt(text):
-			txt = ' '.join(converter(text))
-			return fill(txt, chars)
+			return fill(converter(text), chars)
 	else:
 		def fmt(text):
 			return text.strip()

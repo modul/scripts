@@ -25,6 +25,10 @@ from argparse import FileType, ArgumentParser
 
 __version__ = "0.3.1"
 
+hexs = lambda text: ' '.join("{:02x}".format(x) for x in bytearray(text))
+bins = lambda text: ' '.join("{:08b}".format(x) for x in bytearray(text))
+decs = lambda text: ' '.join("{: 3d}".format(x) for x in bytearray(text))
+
 def mk_date(fmt):
 	''' Return a wrapper for strftime(fmt) '''
 	def date():
@@ -43,21 +47,6 @@ def mk_seconds(start):
 		return "{:6.2f}".format(time.time()-start)
 	return seconds
 
-def hexs(text):
-	''' Yields hex representation for bytes in text '''
-	for x in bytearray(text):
-		yield "{:02x}".format(x)
-
-def bins(text):
-	''' Yields binary representation for bytes in text '''
-	for x in bytearray(text):
-		yield "{:08b}".format(x)
-
-def decs(text):
-	''' Yields decimal representation for bytes in text '''
-	for x in bytearray(text):
-		yield "{: 3d}".format(x)
-
 def formatter(flist=[], conv=None, sep="|"):
 	''' Build a function that prepends some info strings to a string,
 	which is, if conv is one of hexs, decs or bins, first converted
@@ -68,7 +57,7 @@ def formatter(flist=[], conv=None, sep="|"):
 	if not callable(conv):
 		convert = lambda text: text
 	else:
-		convert = lambda text: ' '.join(conv(text))+"\n"
+		convert = lambda text: conv(text)
 
 	flist.append(lambda: sep+' ')
 	def _formatter(line):
