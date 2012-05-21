@@ -111,7 +111,7 @@ group = parser.add_argument_group("Format")
 group.add_argument("--hex", dest="converter", action="store_const", const=hexs, default=None)
 group.add_argument("--binary", dest="converter", action="store_const", const=bins, default=None)
 group.add_argument("--decimal", dest="converter", action="store_const", const=decs, default=None)
-group.add_argument("--width", default=8, type=int, help="how much bytes to display in a line")
+group.add_argument("--width", default=8, type=int, help="number of bytes per line")
 
 group = parser.add_argument_group("Prompt")
 group.add_argument("--prompt", metavar="STR", default="> ", help="show STR as prompt; might include strftime-like formatting")
