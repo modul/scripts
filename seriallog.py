@@ -70,15 +70,9 @@ def formatter(flist=[], conv=None, sep="|"):
 	else:
 		convert = lambda text: ' '.join(conv(text))+"\n"
 
-	def pieces(line):
-		for f in flist:
-			if callable(f):
-				yield f()
-		yield sep
-		yield convert(line)
-
+	flist.append(lambda: sep+' ')
 	def _formatter(line):
-		return ' '.join(pieces(line))
+		return ' '.join(f() for f in flist if callable(f)) + convert(line)
 	return _formatter
 
 
