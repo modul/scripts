@@ -47,7 +47,7 @@ def mk_seconds(start):
 		return "{:6.2f}".format(time.time()-start)
 	return seconds
 
-def formatter(flist=[], conv=None, sep="|"):
+def formatter(flist=[], conv=None, sep="| "):
 	''' Build a function that prepends some info strings to a string,
 	which is, if conv is one of hexs, decs or bins, first converted
 	to a hex, decimal or binary dump.
@@ -59,9 +59,11 @@ def formatter(flist=[], conv=None, sep="|"):
 	else:
 		convert = lambda text: conv(text)
 
-	flist.append(lambda: sep+' ')
+	if flist:
+		flist += [sep]
+
 	def _formatter(line):
-		return ' '.join(f() for f in flist if callable(f)) + convert(line)
+		return ' '.join(callable(f) and f() or str(f) for f in flist) + convert(line)
 	return _formatter
 
 
@@ -76,9 +78,9 @@ parser.add_argument("--baudrate", metavar="BAUD", default=115200, type=int, help
 parser.add_argument("--logfile", metavar="FILE", type=FileType(mode="w"), help="write output to logfile")
 
 group = parser.add_argument_group(title="Timestamps")
-group.add_argument("--date", action="append_const", dest="timestamps", const=mk_date("%Y/%m/%d %H:%M:%S"), help="prepend time and date", default=None)
-group.add_argument("--timestamp", action="append_const", dest="timestamps", const=mk_tstamp(), help="prepend timestamp", default=None)
-group.add_argument("--seconds", action="append_const", dest="timestamps", const=mk_seconds(time.time()), help="prepend seconds since start", default=None)
+group.add_argument("--date", action="append_const", dest="timestamps", const=mk_date("%Y/%m/%d %H:%M:%S"), help="prepend time and date", default=[])
+group.add_argument("--timestamp", action="append_const", dest="timestamps", const=mk_tstamp(), help="prepend timestamp", default=[])
+group.add_argument("--seconds", action="append_const", dest="timestamps", const=mk_seconds(time.time()), help="prepend seconds since start", default=[])
 
 group = parser.add_argument_group("Format")
 group.add_argument("--hex", dest="converter", action="store_const", const=hexs, default=None, help="display responses as hex")
