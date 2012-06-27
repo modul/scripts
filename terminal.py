@@ -44,10 +44,10 @@ def formatter(converter=None, width=0):
 		digits = len(converter("\xff"))
 		chars = width * (digits + 1)
 		def fmt(text):
-			return fill(converter(text), chars)
+			return fill(converter(text), chars) + '\n'
 	else:
 		def fmt(text):
-			return text.strip()
+			return text
 	return fmt
 
 def prompter(promptstr, cmd=None, port=None):
@@ -126,7 +126,7 @@ if args.commands:
 	incoming = ''.join(port.readlines())
 	if incoming:
 		if not args.quiet:
-			print fmt(incoming)
+			print fmt(incoming),
 		if args.logfile:
 			print >> args.logfile, fmt(incoming)
 			args.logfile.flush()
@@ -140,7 +140,7 @@ try:
 		incoming = ''.join(port.readlines())
 		if incoming:
 			if not args.quiet:
-				print fmt(incoming)
+				print fmt(incoming),
 			if args.logfile:
 				print >> args.logfile, '<', fmt(incoming)
 				args.logfile.flush()
