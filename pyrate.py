@@ -1,4 +1,5 @@
-# 
+# -*- encoding: utf8 -*- 
+#
 # Copyright (c) 2012, Remo Giermann <mo@liberejo.de>
 # 
 # Permission to use, copy, modify, and/or distribute this software for any purpose
