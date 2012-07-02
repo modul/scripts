@@ -30,6 +30,11 @@ def flat(*args):
 			r.append(a)
 	return r
 
+def bitreverse(byte, bits=8):
+	''' Change bit order '''
+	byte = ''.join(bit for bit in reversed("{:0"+str(bits)+"b}".format(byte)))
+	return int(byte, 2)
+
 class BB:
 	''' BitBang commands '''
 	reset_mode  = 0
@@ -100,6 +105,7 @@ class SPIConfig:
 	smp = 1<<0      # sample time: end
 
 class Pirate(object):
+
 	def __init__(self, port="/dev/ttyUSB0", baudrate=115200, timeout=0.2, **kwargs):
 		self.port = serial.Serial(port, baudrate, timeout=timeout, **kwargs)
 		mode = self.sresponse(0)
