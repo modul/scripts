@@ -60,7 +60,7 @@ class OWI:
 
 class SPI:
 	''' SPI-only commands '''
-	chipselect = 2
+	cs = 2
 	speed30k   = 96
 	speed125k  = 97
 	speed250k  = 98
