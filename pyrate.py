@@ -23,7 +23,7 @@ def flat(*args):
 	r = []
 	for a in args:
 		if type(a) == str:
-			r.extend(a)
+			r.extend(list(a))
 		elif type(a) in (tuple, list):
 			r.extend(flat(*a))
 		else:
