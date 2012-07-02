@@ -32,7 +32,8 @@ def flat(*args):
 
 def bitreverse(byte, bits=8):
 	''' Change bit order '''
-	byte = ''.join(bit for bit in reversed("{:0"+str(bits)+"b}".format(byte)))
+	binary = ("{:0"+str(bits)+"b}").format(byte)
+	byte = ''.join(bit for bit in reversed(binary))
 	return int(byte, 2)
 
 class BB:
