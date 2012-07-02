@@ -62,6 +62,18 @@ def octets(data, lsbfirst=False, LSBfirst=False):
 		o.extend(tmp)
 	return o
 
+def from_2compl(b, bits=12):
+	''' Return signed decimal from Two’s Complement binary 'b'. '''
+	if b&1<<(bits-1):
+		return -(2**bits - b)
+	return b
+
+def to_2compl(d, bits=12):
+	''' Return Two’s Complement binary for signed decimal 'd'. '''
+	if d<0:
+		return 2**bits - abs(d)
+	return d
+
 
 ### Bus Pirate definitions and API
 
