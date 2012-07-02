@@ -65,7 +65,8 @@ class OWI:
 
 class SPI:
 	''' SPI-only commands '''
-	cs = 2
+	cslow  = 2
+	cshigh = 3
 	speed30k   = 96
 	speed125k  = 97
 	speed250k  = 98
