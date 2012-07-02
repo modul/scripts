@@ -57,7 +57,7 @@ def octets(data, lsbfirst=False, LSBfirst=False):
 		if lsbfirst:
 			tmp = map(bitreverse, tmp)
 		if not LSBfirst:
-			tmp = list(reversed(tmp))
+			tmp = reversed(tmp)
 		o.extend(tmp)
 	return o
 
