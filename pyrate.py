@@ -17,6 +17,9 @@ import serial
 import time
 from sys import stderr
 
+
+### Utilities ###
+
 def flat(*args):
 	''' Make a flat list out of many arguments including nested
 	lists or strings. '''
@@ -35,6 +38,31 @@ def bitreverse(byte, bits=8):
 	binary = ("{:0"+str(bits)+"b}").format(byte)
 	byte = ''.join(bit for bit in reversed(binary))
 	return int(byte, 2)
+
+def octets(data, lsbfirst=False, LSBfirst=False):
+	''' Convert a list of integers, strings or (nested) lists of those
+	and return a sequence of single octets in the right bit- and byte-order.
+	lsbfirst: change bit-order to least significant bit first
+	LSBfirst: change byte-order to least significant byte first (for data > 0xFF)
+	'''
+	o = []
+	for b in flat(data):
+		tmp = []
+		if type(b) is str:
+			b = ord(b)
+		while b > 0xff:
+			tmp.append(b&0xff)
+			b = b >> 8
+		tmp.append(b)
+		if lsbfirst:
+			tmp = map(bitreverse, tmp)
+		if not LSBfirst:
+			tmp = list(reversed(tmp))
+		o.extend(tmp)
+	return o
+
+
+### Bus Pirate definitions and API
 
 class BB:
 	''' BitBang commands '''
@@ -108,8 +136,10 @@ class SPIConfig:
 
 class Pirate(object):
 
-	def __init__(self, port="/dev/ttyUSB0", baudrate=115200, timeout=0.2, **kwargs):
+	def __init__(self, port="/dev/ttyUSB0", baudrate=115200, timeout=0.2, lsbfirst=False, LSBfirst=False, **kwargs):
 		self.port = serial.Serial(port, baudrate, timeout=timeout, **kwargs)
+		self.lsbfirst = lsbfirst
+		self.LSBfirst = LSBfirst
 		mode = self.sresponse(0)
 		if self.sresponse(0) != "BBIO1":
 			print >>stderr, "pirate is in terminal mode"
@@ -177,12 +207,17 @@ class Pirate(object):
 		return self.command(BB.pinconfig|(pins&0x0F))
 
 	def transmit(self, *data):
-		''' Transmit data to a slave device. Data can be any 
-		number of integers, strings or (nested) lists of those. '''
+		''' Transmit data to a slave device. Data can be any number of
+		integers, strings or (nested) lists of those.
+		Bit- and byte-order can be changed by setting/clearing Pirate.lsbfirst
+		and Pirate.LSBfirst. Returned bytes will be in the right bit-order.
+		'''
+		data = octets(data, self.lsbfirst, self.LSBfirst)
 		if not self.command(BB.bulk_write|(len(data)-1)):
 			return []
 		else:
-			return self.response(*data[:16])
+			r = self.response(*data[:16])
+			return self.lsbfirst and map(bitreverse, r) or r
 
 	def info(self):
 		''' Return current mode string. Beware: In HiZ mode (BBIO1)
