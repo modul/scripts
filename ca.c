@@ -14,14 +14,13 @@
 
 int main(int argc, const char *argv[])
 {
-	long i, r=30, w=1L<<32;
+	long i, g, r=30, w=1L<<32;
 	if (argc == 3) {
 		sscanf(argv[1], "%u", &r);
 		sscanf(argv[2], "%x", &w);
 	}
 	while (1) {
-		long g = 0;
-		for (i=1; i<sizeof(long)*8; i++) {
+		for (g=0,i=1; i<sizeof(long)*8; i++) {
 			long nbhood = (w&(7L<<(i-1)))>>(i-1);
 			g |= (r&(1L<<nbhood))<<(i-nbhood);
 			putchar(w&(1L<<i)?'X':' ');
