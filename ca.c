@@ -21,13 +21,15 @@ int main(int argc, const char *argv[])
 	}
 	while (1) {
 		long g = 0;
-		for (i=1; i<sizeof(long)*8-1; i++) {
-			long pat = (w&(7L<<(i-1)))>>(i-1);
-			g |= (r&(1L<<pat))<<(i-pat);
+		for (i=1; i<sizeof(long)*8; i++) {
+			long nbhood = (w&(7L<<(i-1)))>>(i-1);
+			g |= (r&(1L<<nbhood))<<(i-nbhood);
 			putchar(w&(1L<<i)?'X':' ');
 		}
+		if (w == g || (w&(1L<<63) && w&(1L<<1))) break;
 		putchar(10);
 		usleep(10000);
 		w = g;
 	}
+	return 0;
 }
