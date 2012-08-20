@@ -14,21 +14,19 @@
 
 int main(int argc, const char *argv[])
 {
-	long i, g, r=30, w=1L<<32;
+	long i, w=0, r=30, g=1L<<32;
 	if (argc == 3) {
 		sscanf(argv[1], "%u", &r);
-		sscanf(argv[2], "%x", &w);
+		sscanf(argv[2], "%lx", &g);
 	}
 	while (1) {
-		for (g=0,i=1; i<sizeof(long)*8; i++) {
+		for (w=g,i=1,g=0; i<sizeof(long)*8; i++) {
 			long nbhood = (w&(7L<<(i-1)))>>(i-1);
 			g |= (r&(1L<<nbhood))<<(i-nbhood);
 			putchar(w&(1L<<i)?'X':' ');
 		}
 		if (w == g || (w&(1L<<63) && w&(1L<<1))) break;
-		putchar(10);
-		usleep(10000);
-		w = g;
+		putchar(10); usleep(10000);
 	}
 	return 0;
 }
