@@ -12,7 +12,7 @@
 
 void usage(const char *p)
 {
-	printf("Usage: %s [-h|--help] [b|w] [rRULE] [wWIDTH] [OUTFILE]\n", p);
+	printf("Usage: %s [-h|--help] [black|white] [rRULE] [wWIDTH] [OUTFILE]\n", p);
 	exit(0);
 }
 
@@ -45,21 +45,21 @@ int ca(int *u, size_t w, size_t max, int rule)
 
 int main(int argc, const char **argv)
 {
-	int t, b, *u, w=W, r=30, h=0;
+	int t, *u, b=1, w=W, r=30, h=0;
 	FILE *out = stdout;
 	char c[32];
 	while (--argc > 0) {
 		if (strcmp(argv[argc], "-h") == 0 || strcmp(argv[argc], "--help") == 0) 
 			usage(argv[0]);
-		else if (sscanf(argv[argc], "%c%u", c, &t) == 2) {
+		else if (strcmp(argv[argc], "black") == 0) b = 0;
+		else if (strcmp(argv[argc], "white") == 0) b = 1;
+		else if (sscanf(argv[argc], "%c%u", c, &t) == 2 && *c == 'r' || *c == 'w') {
 			if (*c == 'r') r = t;
 			else if (*c == 'w') w = t;
-			else if (!(out = fopen(argv[argc], "w"))) {
-				perror(argv[argc]); usage(argv[0]);
-			}
 		}
-		else if (sscanf(argv[argc], "%c", c) == 1)
-			b = *c=='b'? 0: 1;
+		else if (!(out = fopen(argv[argc], "w"))) {
+			perror(argv[argc]); usage(argv[0]);
+		}
 	}
 
 	h = w*3/2;
