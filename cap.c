@@ -23,7 +23,7 @@ void pbm(int *u, size_t w, size_t h, FILE *o, int b, const char *desc)
 	for (y=0; y<h; y++) {
 		for (x=0; x<w; x++)
 			fprintf(o, "%u ", u[y*w+x]?b:!b);
-		fputc(10, o);
+		putc(10, o);
 	}
 }
 
@@ -39,7 +39,8 @@ int ca(int *u, size_t w, size_t max, int rule)
 			u[(t+1)*w+x] = (rule&(1<<n))>>n;
 		}
 		if (u[t*w] && u[t*w+w-1]) break;
-	}
+		fprintf(stderr, "\r%u", t);
+	}; putc(10, stderr);
 	return t+1;
 }
 
