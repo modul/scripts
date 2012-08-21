@@ -19,7 +19,7 @@ int main(int argc, const char *argv[])
 		sscanf(argv[1], "%u", &r);
 		sscanf(argv[2], "%lx", &g);
 	}
-	while (1) {
+	while (1) { /* this code ignores the 0th bit */
 		for (w=g,i=1,g=0; i<sizeof(long)*8; i++) {
 			long nbhood = (w&(7L<<(i-1)))>>(i-1);
 			g |= (r&(1L<<nbhood))<<(i-nbhood);
