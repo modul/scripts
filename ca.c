@@ -3,8 +3,7 @@
  *
  * Usage: binary-name [RULE INITAL] 
  * where RULE sets the CA rule (def. 30)
- * and  INITIAL the initial hex start pattern 
- * (def. 0x100000000 i.e. a centered 1).
+ * and  INITIAL the hex start pattern (def. 0x100000000 i.e. a centered 1).
  *
  * All rights reversed.
  * 2012 Remo Giermann <mo@liberejo.de>
