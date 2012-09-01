@@ -43,6 +43,7 @@ tar \
 --exclude '.macromedia' \
 --exclude '.cpan' \
 --exclude '.marble/data' \
+--exclude '.local/share/marble' \
 --exclude '.mozilla/firefox/Crash Reports' \
 -cvpzf $filename $_source/.[a-zA-Z0-9]*
 
