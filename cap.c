@@ -2,7 +2,7 @@
  * Print Cellular Automata output in netpbm format.
  * 
  * All rights reversed.
- * 2012 Remo Giermann <mo@liberejo.d>
+ * 2012 Remo Giermann <mo@liberejo.de>
  *
  */
 #include <stdio.h>
