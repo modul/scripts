@@ -55,17 +55,18 @@ def find(directory, name='', days=0, hook=None):
 			pass
 	
 	for dirpath, dirs, files in os.walk(directory):
-		for f in files:
+		for f in files: # match file names
 			path = os.path.join(dirpath, f)
 			if match(name, f) is not None:
 				if days == 0 or check_time(path, days) is True:
 					call(path)
-
-		if days > 0: # we don't need to walk unmodified dirs then
-			for d in dirs:
-				path = os.path.join(dirpath, d)
-				if check_time(path, days) is False:
-					dirs.remove(d)
+		for d in dirs: # match dir names
+			path = os.path.join(dirpath, d)
+			if match(name, d) is not None:
+				if days == 0 or check_time(path, days) is True:
+					call(path)
+			if days > 0 and check_time(path, days) is False: #remove unmodified directories
+				dirs.remove(d)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__': 
