@@ -35,13 +35,11 @@ def check_time(path, days):
 
 def find(directory, name='', days=0, hook=None):
 	"""
-	Find files in 'directory' (recursively). 
-	'name' might be a regular expression to match against
-	the filename (not the path). If 'days' is not 0, match
-	only files modified in the last days. If 'hook' is callable, 
-	then it will be called on any file found with the filename 
-	as an argument.	Otherwise, if 'hook' is True, results 
-	get printed.
+	Find files in 'directory' (recursively). 'name' might be a regular
+	expression to match against the filename (not the path). If 'days' is not
+	zero, match only files modified in the last days. If 'hook' is callable,
+	then it will be called on any file found with the filename as an argument.
+	Otherwise, if 'hook' is True, results get printed.
 
 	>>> find("./", name=r"find.pyc?")
 	./find.pyc
