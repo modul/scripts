@@ -22,7 +22,10 @@ def lineprinter(portstr):
 		exit(1)
 	def lp(line=None):
 		if line is not None:
-			print >>port, line.strip().decode('utf8').encode('cp437', 'ignore')+EOL
+			line = line.strip().decode('utf8').encode('cp437', 'ignore')
+			port.write(line)
+			if len(line) != WIDTH: # feeds automatically after WIDTH characters
+				port.write(EOL)
 	return lp
 
 def timestamp():
