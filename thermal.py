@@ -11,6 +11,7 @@ from sys import argv, stderr, stdin, exit
 
 LPT = "/dev/usb/lp0"
 WIDTH = 24
+LINE = '-'*WIDTH
 EOL = '\r'
 
 def lineprinter(portstr):
@@ -31,8 +32,9 @@ def lineprinter(portstr):
 def timestamp():
 	return strftime("%y/%m/%d %H:%M")
 
-def shorten(string, width=80, append='...'):
-	if len(string) > 80: return string[:width-len(append)]+append
+def truncate(string, width=80, append=''):
+	if len(string) > width: return string[:width-len(append)]+append
+	return string
 
 class PrintHandler(SocketServer.BaseRequestHandler):
 	def handle(self):
@@ -44,7 +46,7 @@ class PrintHandler(SocketServer.BaseRequestHandler):
 			sender = ip.replace(':', '').replace('.', '')
 			lp("{} {}".format(timestamp(), sender[-8:]))
 			lp(data)
-			lp("-"*(WIDTH-1))
+			lp(LINE)
 			r = "SUCCESS"
 		except SystemExit:
 			r = "NO PORT"
@@ -61,6 +63,7 @@ if __name__ == "__main__":
 	parser = ArgumentParser(description="Thermal Printer Frontend")
 	parser.add_argument("file", nargs='?', help="file to print (stdin)", type=FileType('r'), default=stdin)
 	parser.add_argument("-p", metavar="PORT", dest="port", help="printer port "+LPT, default=LPT)
+	parser.add_argument("-k", action="store_true", dest="trunc", help="truncate lines", default=False)
 	parser.add_argument("-t", action="store_true", dest="time", help="add timestamp", default=False)
 	parser.add_argument("-l", action="store_true", dest="line", help="append horizontal line", default=False)
 	parser.add_argument("-s", action="store_true", dest="serve", help="serve via UDP6:2323", default=False)
@@ -73,7 +76,8 @@ if __name__ == "__main__":
 		else:
 			lp = lineprinter(args.port)
 			if args.time: lp(timestamp())
-			for line in args.file: lp(line)
-			lp(args.line and '-'*(WIDTH-1) or None)
+			for line in args.file: 
+				lp(args.trunc and truncate(line, WIDTH) or line)
+			lp(args.line and LINE or None)
 	except KeyboardInterrupt:
 		print >>stderr, "terminated ..."
