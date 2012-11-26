@@ -1,4 +1,9 @@
 #!/usr/bin/env python
+# 
+# All rights reversed.
+# 2012 Remo Giermann <mo@liberejo.de>
+# 
+
 import socket
 from BaseHTTPServer import HTTPServer
 from SimpleHTTPServer import SimpleHTTPRequestHandler
