@@ -17,7 +17,7 @@
 # created: 2012/05/15
 #
 
-__version__ = "0.1"
+__version__ = "0.1.1"
 
 import sys
 from time import strftime
@@ -212,6 +212,11 @@ def getlines(filename):
 			return None
 	return []
 
+def checkforpatch(lines, patch):
+	for i, line in enumerate(lines):
+		if len(line) > 3 and line in patch:
+			return i+1
+	return 0
 
 if __name__ == "__main__":
 	
@@ -259,14 +264,13 @@ if __name__ == "__main__":
 
 		if origlines is None:
 			continue
-
-		if origlines:
+		elif origlines:
 			action = "patched"
 
-			for i, oline in enumerate(origlines[:10]):
-				if len(oline) > 3 and oline in patch and not args.force:
-					print "{}: line {} kind of matches, file seems to have this header already.".format(filename, i)
-					sys.exit(1)
+			match = checkforpatch(origlines[:10], patch)
+			if match > 0 and not args.force:
+				print "{}:{}: file seems to have this header already.".format(filename, match)
+				continue
 
 			if origlines[0].startswith("#!"): 
 				skip = 1
@@ -281,12 +285,10 @@ if __name__ == "__main__":
 			action = "created"
 
 		origlines.insert(skip, patch+'\n\n')
-
 		try:
 			if args.backup and action == "patched":
 				copy(filename, filename+'~')
 				print "backed up", filename
-
 			with open(filename, "w") as fp:
 				fp.writelines(origlines)
 
