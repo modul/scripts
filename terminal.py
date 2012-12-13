@@ -23,7 +23,7 @@ import serial
 import readline
 from argparse import FileType, ArgumentParser
 
-__version__ = "0.2.3"
+__version__ = "0.2.4"
 
 ### Converters for hex, binary or decimal dumps ###
 
@@ -142,7 +142,7 @@ try:
 			if not args.quiet:
 				print fmt(incoming),
 			if args.logfile:
-				print >> args.logfile, '<', fmt(incoming)
+				print >> args.logfile, '<', fmt(incoming).strip().replace('\n', '\n< ')
 				args.logfile.flush()
 
 		try:
