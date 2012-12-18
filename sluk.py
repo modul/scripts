@@ -5,8 +5,8 @@
 # 
 
 #
-# Split text into fields, take one field as a
-# key and summarize lines with that same key like:
+# Splits text into fields, takes one field as a
+# key and summarizes lines with that same key.
 #
 # very useful with log files, e.g.:
 # > git log --date=short --pretty="format:%ad %s" | sluk.py 
