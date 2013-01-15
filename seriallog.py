@@ -103,8 +103,8 @@ group.add_argument("--seconds", action="append_const", dest="timestamps", const=
 group = parser.add_argument_group("Format")
 group.add_argument("--width", default=70, type=int, help="number of characters/bytes per line")
 group.add_argument("--hex", dest="converter", action="store_const", const=hexs, default=None, help="display responses as hex")
-group.add_argument("--binary", dest="converter", action="store_const", const=bins, default=None, help="display responses as decimal")
-group.add_argument("--decimal", dest="converter", action="store_const", const=decs, default=None, help="display responses as binary")
+group.add_argument("--binary", dest="converter", action="store_const", const=bins, default=None, help="display responses as binary")
+group.add_argument("--decimal", dest="converter", action="store_const", const=decs, default=None, help="display responses as decimal")
 
 group = parser.add_argument_group(title="Sending")
 group.add_argument("--send", metavar="CMD", nargs="+", help="send serial commands, then read")
