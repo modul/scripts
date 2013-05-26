@@ -14,7 +14,7 @@ int main(int argc, const char *argv[])
 	time_t now = time(NULL);
 	time_t then = 0;
 	struct tm *dt = localtime(&now);
-	int months, days, hours, minutes, seconds;
+	int weeks, days, hours, minutes, seconds;
 
 	if (argc < 2 || sscanf(argv[1], "%u/%u/%u", &dt->tm_year, &dt->tm_mon, &dt->tm_mday) < 3) {
 		printf("usage: %s YYYY/MM/DD [HH:MM[:SS]]\n", argv[0]);
@@ -36,11 +36,11 @@ int main(int argc, const char *argv[])
 	minutes = minutes%60;
 	days    = hours/24;
 	hours   = hours%24;
-	months  = days/31;
-	days    = days%31;
+	weeks  = days/7;
+	days    = days%7;
 
-	printf("%u months %u days %u hours %u minutes %u seconds %s\n", 
-			months, days, hours, minutes, seconds, then<now?"ago":"to go");
+	printf("%u weeks %u days %u hours %u minutes %u seconds %s\n", 
+			weeks, days, hours, minutes, seconds, then<now?"ago":"to go");
 
 	return 0;
 }
