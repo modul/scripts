@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <time.h>
 
+#define plural(x) (x==0? 's' :(x==1? 0 : 's'))
+
 int main(int argc, const char *argv[])
 {
 	time_t now = time(NULL);
@@ -36,11 +38,13 @@ int main(int argc, const char *argv[])
 	minutes = minutes%60;
 	days    = hours/24;
 	hours   = hours%24;
-	weeks  = days/7;
-	days    = days%7;
 
-	printf("%u weeks %u days %u hours %u minutes %u seconds %s\n", 
-			weeks, days, hours, minutes, seconds, then<now?"ago":"to go");
+	printf("%u day%c %u hour%c %u minute%c %u second%c %s\n", 
+			days, plural(days), 
+			hours, plural(hours),
+			minutes, plural(minutes), 
+			seconds, plural(seconds), 
+			then<now?"ago":"to go");
 
 	return 0;
 }
