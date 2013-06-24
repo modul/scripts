@@ -18,6 +18,7 @@ parser = ArgumentParser(description="Sends a comand to a serial terminal and pri
 parser.add_argument("device", help="serial device to open")
 parser.add_argument("command", help="command to send")
 parser.add_argument("--baudrate", metavar="BAUD", default=115200, type=int, help="set baudrate (115200)")
+parser.add_argument("--timeout", metavar="SEC", default=1.0, type=float, help="set timeout (1.0)")
 parser.add_argument("--eol", default="lf", choices=["lf", "crlf", "cr", "lfcr", "none"], help="end of line characters (lf)")
 parser.add_argument("--hex", dest="converter", action="store_const", const=hexs, default=None, help="display responses as hex")
 parser.add_argument("--binary", dest="converter", action="store_const", const=bins, default=None, help="display responses as binary")
@@ -26,7 +27,7 @@ parser.add_argument("--decimal", dest="converter", action="store_const", const=d
 args = parser.parse_args()
 eol = args.eol.replace("lf", "\n").replace("cr", "\r").replace("none", "")
 
-port = Serial(args.device, args.baudrate, timeout=1)
+port = Serial(args.device, args.baudrate, timeout=args.timeout)
 print >>port, args.command + eol,
 for line in port.readlines():
 	if args.converter: print args.converter(line)
