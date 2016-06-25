@@ -47,7 +47,7 @@ def recurse(directory):
 if __name__ == "__main__":
 
 	if len(argv) < 2:
-		print argv[0], "DIRECTORY [REPLACEACEMENT]"
+		print argv[0], "DIRECTORY [REPLACEMENT]"
 	else:
 		if len(argv) == 3:
 			REPLACE = argv[2]
